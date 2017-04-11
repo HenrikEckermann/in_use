@@ -16,14 +16,20 @@ To simulate an investment, type **investment()** and within parenthesis you need
 
 ### Example:
  --> invest 100000 in 40% stocks 40% secure, 20% alternative for 10 years:
+
 **invest_1 = investment(100000,0.4,0.4,0.2,10)** 
 
  --> let 10 years pass and return the data in a DataFrame:
+
 **invest_1.apply()**		
+ 
  --> Plot the data:
+
 **invest_1.show()**  
- -->Simulates a crash (1 year) in the stocks-part whereas the other 2 parts run as expected:	
+ -->Simulates a crash (1 year) in the stocks-part whereas the other 2 parts run as expected:
+
 **invest_apply_crash()** 	
+
 
 
 
@@ -31,17 +37,18 @@ To simulate an investment, type **investment()** and within parenthesis you need
 ### 2. organize_files
 This was my first self written program. 
 
-Imagine you recorded videos with your smartphone and you want to copy them onto your local machine. When you open the directory you may find another directory, (for example for dates) within that directory and even another subdirectory for each video file. If you want all your videos in one place you would need to copy every single one and open every directory. This program scans all files in a specified directory (incl. subdirectories) and moves them to one folder.
+Imagine you recorded videos with your smartphone and you want to copy them onto your local machine. When you open the directory you may find another directory, (for example for dates) within that directory and even another subdirectory for each video file. If you want all your videos in one place you would need to copy every single one and open every directory. This program scans all files (that match speciefied RegEx) in a specified directory (incl. subdirectories) and moves them to one folder. Default RegEx will scan for most popular audio and video file types such as mp3, mp4, avi...
+
 
 ### How to use
 
 **media_trans(directory, destpath, create_folder='', regEx='')**
 
 ### Example:
- --> Find media files in 'users/Videos' and all subdirectories and move them to 'users/test':
+ --> Find media files in 'users/Videos' incl. subdirectories and move them to 'users/test':
 **media_trans('users/Videos', 'users/test')**
 
- --> Find files that end with 'txt' in 'users/files' and all subdirectories and move them to 'users/test/here':
+ --> Find files that end with 'txt' in 'users/files' incl. subdirectories and move them to 'users/test/here':
 
 **media_trans('users/Videos', 'users/test', create_folder='here',regEx='.*txt')**
 

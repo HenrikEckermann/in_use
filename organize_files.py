@@ -9,7 +9,7 @@ import os
 
 
 def media_trans(directory, destpath, create_folder='', regEx=''):
-    ''' moves media files (or filenames that match specified regular expression) from folder and/or subfolders into a single destination folder.
+    ''' moves media files (or filenames that match specified regular expression) from directory (incl. subfolders) into a single destpath.
         Creates new folder if specified.
     '''
     
@@ -20,7 +20,7 @@ def media_trans(directory, destpath, create_folder='', regEx=''):
         
         # specify default regEx for media files unless regEx is specified
         if regEx == '':
-            fileReg = re.compile('.*(mkv|.*mpeg|.*fla|.*swf|.*flv|.*mov|.*m4v|.*mp4|.*mpg|.*mp3|.*flac|.*wmv|.*sub|.*idx|.*sfv)')
+            fileReg = re.compile('.*(mkv|.*mpeg|.*fla|.*swf|.*flv|.*mov|.*m4v|.*mp4|.*mpg|.*mp3|.*flac|.*wmv|.*sub|.*idx|.*sfv|.*avi)')
         else:
             fileReg = re.compile(regEx)
     
