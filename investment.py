@@ -14,9 +14,9 @@ import numpy as np
 import pandas as pd
 
 
-class Anlage:
+class investment:
   
-    def __init__(self,K,stocks,sec,alt,years):
+    def __init__(self,K,stocks,sec,alt,years=1):
         self.K = K
         self.stocks = stocks
         self.sec = sec
@@ -59,7 +59,7 @@ class Anlage:
         return K
         
 
-    def stocks_rendite(self):
+    def stocks_return(self):
         '''Simulates stocks'''
         p = np.random.normal(loc=1,scale=12)
         self.p_st_values.append(p)
@@ -70,7 +70,7 @@ class Anlage:
         self.diff_st.append(diff)
                         
     
-    def sec_rendite(self):
+    def sec_return(self):
         '''Simulates secure investments'''
         p = np.random.normal(loc=1,scale=1.5)
         self.p_sec_values.append(p)
@@ -81,7 +81,7 @@ class Anlage:
         self.diff_sec.append(diff)
 
 
-    def alt_rendite(self):
+    def alt_return(self):
         '''Simulates alternative investments'''
         p = np.random.normal(loc=1,scale=10)
         self.p_alt_values.append(p)
@@ -129,9 +129,9 @@ class Anlage:
     def apply(self):
         '''Let specified time pass'''
         for i in range(self.years):
-            self.stocks_rendite()
-            self.sec_rendite()
-            self.alt_rendite()
+            self.stocks_return()
+            self.sec_return()
+            self.alt_return()
             self.distrib()
             self.update()
             self.reset()
@@ -145,8 +145,8 @@ class Anlage:
     def apply_crash(self):
         '''simulates a crash in stocks market'''
 
-        self.sec_rendite()
-        self.alt_rendite()
+        self.sec_return()
+        self.alt_return()
         
         #here comes the crash
         p = np.random.normal(loc=-60,scale=10)
