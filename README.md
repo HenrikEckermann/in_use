@@ -2,7 +2,7 @@
 
 #### Here I will upload self written programs that I created mostly for exercise purposes. Below you find them listed with a short explanation.
 
-### 1. Investment:
+### 1. simulate investment:
 I wrote this class to excerise general use of Python and PANDAS. It is my second 'program' and I know that this is not the optimal code but it works and reflects my current (March 2017) level of Python. I planned to use PyMC3 to model expected return rates based on past information. This will be the next exercise for me. At this moment the return rate is simply a random value from a normal distribution. For example the return rate of a very low risk investment is simply a random value of a normal distribution: np.random.normal(loc=1.5,scale=1.5).
 
 
@@ -34,7 +34,7 @@ To simulate an investment, type **investment()** and within parenthesis you need
 
 
 
-### 2. organize_files
+### 2. Transfer media files
 This was my first self written program. 
 
 Imagine you recorded videos with your smartphone and you want to copy them onto your local machine. When you open the directory you may find another directory, (for example for dates) within that directory and even another subdirectory for each video file. If you want all your videos in one place you would need to copy every single one and open every directory. This program scans all files (that match speciefied RegEx) in a specified directory (incl. subdirectories) and moves them to one folder. Default RegEx will scan for most popular audio and video file types such as mp3, mp4, avi...

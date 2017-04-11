@@ -16,12 +16,13 @@ import pandas as pd
 
 class investment:
   
-    def __init__(self,K,stocks,sec,alt,years=1):
+    def __init__(self,K,stocks,sec,alt,years=1,fee=0):
         self.K = K
         self.stocks = stocks
         self.sec = sec
         self.alt = alt
         self.years = years
+        self.fee = fee
         
         #Diversify K according to given ps
         self.K_st = self.stocks*self.K
@@ -54,9 +55,7 @@ class investment:
     @staticmethod
     def zins(K,p, years=1):
         '''return K + interest for given K and p for specified number of years'''
-        for i in range(years):
-            K = K+((p*K)/100) 
-        return K
+        return [K+p*K/100 for i in range(years)][0]
         
 
     def stocks_return(self):
@@ -83,7 +82,7 @@ class investment:
 
     def alt_return(self):
         '''Simulates alternative investments'''
-        p = np.random.normal(loc=1,scale=10)
+        p = np.random.normal(loc=1,scale=5)
         self.p_alt_values.append(p)
         before = self.data.iloc[-1,0]
         self.K_alt = self.zins(self.K_alt,p)
@@ -93,8 +92,8 @@ class investment:
 
 
     def distrib(self):
-        '''Distributes K according to determined p-values'''
-        self.K = self.K_st + self.K_sec + self.K_alt
+        '''Distributes K according to determined p-values and applies fee'''
+        self.K = self.zins(self.K_st + self.K_sec + self.K_alt,-self.fee)
         self.K_total_values.append(self.K)
         self.K_st = self.stocks*self.K
         self.K_sec = self.sec*self.K
@@ -135,7 +134,7 @@ class investment:
             self.distrib()
             self.update()
             self.reset()
-        print(self.data.tail())
+        print(self.data.tail(),'\n')
         print(self.data_diff.tail())
 
     def show(self):
