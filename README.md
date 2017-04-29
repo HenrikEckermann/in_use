@@ -1,11 +1,13 @@
 # Own
 
-#### Here I will upload self written programs that I created mostly for exercise purposes. Below you find them listed with a short explanation. If you have any feedback or find that I made mistakes, please give me feedback so that I can improve. Also, if you have ideas on how to improve things, let me know your suggestions. All programs work on my computer. Of course you may need to modify the foldernames that may be used.
+#### Here I will upload self written programs that I created mostly for exercise purposes. Below you find them listed with a short explanation. If you find that I made mistakes or that code style could be much better, please give me feedback. Also, if you have any suggestions on how to improve things, let me know. 
+All programs work fine on my computer. Of course you may need to modify the folder-names.
+
 Take the investment.py with a grain of salt as this is an extremely oversimplified and unrealistic model. It may help to calculate how a diversified portfolio can develop IF you modify the return methods. 
 
 ### 1. Pomodoro timer:
 Pomodoro is a technique that helps you to stay motivated and to focus on your tasks. This program tracks how long and how often you work on specified tasks.
-Although the name is Pomodoro, this program is not a pomodoro timer (yet) but it helps to use the Pomodoro technique (or other techniques). I use a pomodoro timer app on my Iphone to regularly pause and work in 25 min steps on a task.
+Although the name is Pomodoro, this program is not a pomodoro timer (yet) but it helps to use the Pomodoro technique (or other techniques). I use a pomodoro timer app on my Iphone to regularly pause and work in 25 min steps on a task, so there was no need to add it here.
 If you use this program daily for all your work related activities (or other activities), you will know exactly how long it took to finish a specific task. Over time, this will help you to better estimate how much time you will need for a certain task and I find it motivating to see what I have done. I found that I underestimated the time I spent working on certain tasks. 
 
 The pandas DF format with datetime index makes it easy to analyze your data.
