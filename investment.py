@@ -159,9 +159,8 @@ class investment:
         self.distrib()
         self.update()
         self.reset()
-        print(self.data.tail())
+        print(self.data.tail(),'\n')
         print(self.data_diff.tail())
-
 
 
             

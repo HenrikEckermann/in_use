@@ -1,2 +1,12 @@
 temp.py
 pymc3
+.DS_Store
+.ipynb_checkpoints
+Bayesian Data Analysis.ipynb
+Think Bayes.ipynb
+Untitled.ipynb
+__pycache__
+pomodoro.pkl
+pomodoro.csv
+pomodoro..pkl
+vlc.py
