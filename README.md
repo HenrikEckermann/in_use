@@ -1,8 +1,24 @@
 # Own
 
-#### Here I will upload self written programs that I created mostly for exercise purposes. Below you find them listed with a short explanation.
+#### Here I will upload self written programs that I created mostly for exercise purposes. Below you find them listed with a short explanation. If you have any feedback or find that I made mistakes, please give me feedback so that I can improve. Also, if you have ideas on how to improve things, let me know your suggestions. All programs work on my computer. Of course you may need to modify the foldernames that may be used.
+Take the investment.py with a grain of salt as this is an extremely oversimplified and unrealistic model. It may help to calculate how a diversified portfolio can develop IF you modify the return methods. 
 
-### 1. simulate investment:
+### 1. Pomodoro timer:
+Pomodoro is a technique that helps you to stay motivated and to focus on your tasks. This program tracks how long and how often you work on specified tasks.
+Although the name is Pomodoro, this program is not a pomodoro timer (yet) but it helps to use the Pomodoro technique (or other techniques). I use a pomodoro timer app on my Iphone to regularly pause and work in 25 min steps on a task.
+If you use this program daily for all your work related activities (or other activities), you will know exactly how long it took to finish a specific task. Over time, this will help you to better estimate how much time you will need for a certain task and I find it motivating to see what I have done. I found that I underestimated the time I spent working on certain tasks. 
+
+The pandas DF format with datetime index make it easy to analyze your data.
+
+### How to use:
+Start using by calling the function pom(). 
+Enter a string (the task you work on), enter ‚q’ to quit the program or just return to continue the task you had been working on last time.
+If you make a pause or if you finished, press Enter again. 
+The date, task and duration has been tracked and stored in a Pandas DF called data. 
+
+
+
+### 2. simulate investment:
 I wrote this class to excerise general use of Python and PANDAS. It is my second 'program' and I know that this is not the optimal code but it works and reflects my current (March 2017) level of Python. I planned to use PyMC3 to model expected return rates based on past information. This will be the next exercise for me. At this moment the return rate is simply a random value from a normal distribution. For example the return rate of a very low risk investment is simply a random value of a normal distribution: np.random.normal(loc=1.5,scale=1.5).
 
 
@@ -34,7 +50,7 @@ To simulate an investment, type **investment()** and within parenthesis you need
 
 
 
-### 2. Transfer media files
+### 3. Transfer media files
 This was my first self written program. 
 
 Imagine you recorded videos with your smartphone and you want to copy them onto your local machine. When you open the directory you may find another directory, (for example for dates) within that directory and even another subdirectory for each video file. If you want all your videos in one place you would need to copy every single one and open every directory. This program scans all files (that match speciefied RegEx) in a specified directory (incl. subdirectories) and moves them to one folder. Default RegEx will scan for most popular audio and video file types such as mp3, mp4, avi...
