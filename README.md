@@ -8,7 +8,7 @@ Pomodoro is a technique that helps you to stay motivated and to focus on your ta
 Although the name is Pomodoro, this program is not a pomodoro timer (yet) but it helps to use the Pomodoro technique (or other techniques). I use a pomodoro timer app on my Iphone to regularly pause and work in 25 min steps on a task.
 If you use this program daily for all your work related activities (or other activities), you will know exactly how long it took to finish a specific task. Over time, this will help you to better estimate how much time you will need for a certain task and I find it motivating to see what I have done. I found that I underestimated the time I spent working on certain tasks. 
 
-The pandas DF format with datetime index make it easy to analyze your data.
+The pandas DF format with datetime index makes it easy to analyze your data.
 
 ### How to use:
 Start using by calling the function pom(). 
