@@ -8,6 +8,7 @@ Created on Mon May  1 09:18:55 2017
 
 import time
 import datetime
+import os
 
 
 def string_to_td(s,d=0):
@@ -25,7 +26,7 @@ def countdown(days=0):
         left = f_time-datetime.datetime.now()
         print('\r{}'.format(str(left).split('.')[0]),end='')
         time.sleep(1)
-    print('Time is over')    
+    os.system('say The time is over!')   
     
     
     
@@ -38,7 +39,7 @@ def countdown_pom():
         left = f_time-datetime.datetime.now()
         print('\r{}'.format(str(left).split('.')[0]),end='')
         time.sleep(1)
-    print('\nTime is over')
+    os.system('say The time is over')
     return td
     
     
