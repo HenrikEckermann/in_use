@@ -11,7 +11,7 @@ import datetime
 
 
 def string_to_td(s,d=0):
-    '''The string must be in the format h:m:s'''
+    '''The string must be in the format h:m:s. Specifying days is optional!'''
     spl= [int(x) for x in s.split(':')]
     td = datetime.timedelta(days=d,hours=spl[0],minutes=spl[1],seconds=spl[2])
     return td

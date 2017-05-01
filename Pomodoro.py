@@ -13,14 +13,11 @@ import timer
   
 def pom_finite():
     '''Pomodoro timer'''
-    if os.path.isfile('/Users/henrikeckermann/Documents/workspace/Own/pomodoro.pkl'):
-        data = pd.read_pickle('/Users/henrikeckermann/Documents/workspace/Own/pomodoro.pkl')
     task = input('Continue last [Enter] or New [\'string\'+Enter]:\n ')
     now = datetime.datetime.now()
     if task == '':
         task = data['Tasks'][-1]
     td = timer.countdown_pom()
-    print(td)
     data_dict = {'Tasks': [task], 'Duration':td}
     index = [now]
     global data_new
