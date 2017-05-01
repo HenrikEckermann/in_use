@@ -5,19 +5,19 @@ All programs work fine on my computer. Of course you may need to modify the fold
 
 Take the investment.py with a grain of salt as this is an extremely oversimplified and unrealistic model. It may help to calculate how a diversified portfolio can develop IF you modify the return methods. 
 
-### 1. Pomodoro timer:
-Pomodoro is a technique that helps you to stay motivated and to focus on your tasks. This program tracks how long and how often you work on specified tasks.
-Although the name is Pomodoro, this program is not a pomodoro timer (yet) but it helps to use the Pomodoro technique (or other techniques). I use a pomodoro timer app on my Iphone to regularly pause and work in 25 min steps on a task, so there was no need to add it here.
-If you use this program daily for all your work related activities (or other activities), you will know exactly how long it took to finish a specific task. Over time, this will help you to better estimate how much time you will need for a certain task and I find it motivating to see what I have done. I found that I underestimated the time I spent working on certain tasks. 
+### 1. Pomodoro timer (you need timer.py for this one):
+Pomodoro is a technique that helps you to stay motivated and to focus on your tasks: You choose a task and specify the duration you will focus on the task without letting distract you from anything like social media, phone, other tasks etc.. Then you set the timer and begin to work. Do not interrupt the task until the time is over to train focus control. If you do not manage to focus for e.g. 25min, choose shorter time intervals. You may also choose a longer time interval but it is recommended to make a short break ever 25-35 minutes. Thus, when the time is over, make a short break of about 5 minutes. After 4 25 min cycles, make a longer break of at least 25 min. Go out for a walk or do anything that does not require you the focus effort so that you brain can rest.
+
+Although the name is Pomodoro, this program is not only a Pomodoro timer but you can also choose to NOT specify a time before or to make an entry about a task you did in the past. Sometimes you cannot make a pause or you work in a team and need to fit the team’s work schedule. 
+
+If you use this program daily for all your work related activities (or other activities), you will know exactly how long it took to finish a specific task. Over time, this will help you to better estimate how much time you will need for a certain task and you may find it motivating to see what you have done. I found that I underestimated the time I spent working on certain tasks. The data will be in a Pandas DF locally on you computer. So modify the foldernames before you use the program.
 
 The pandas DF format with datetime index makes it easy to analyze your data.
 
 ### How to use:
 Start using by calling the function pom(). 
-Enter a string (the task you work on), enter ‚q’ to quit the program or just return to continue the task you had been working on last time.
-If you make a pause or if you finished, press Enter again. 
-The date, task and duration has been tracked and stored in a Pandas DF called data. 
-
+Follow instructions. 
+If you want to use the countdowntimer, choose option 2. 
 
 
 ### 2. simulate investment:
@@ -70,7 +70,8 @@ Imagine you recorded videos with your smartphone and you want to copy them onto 
 
 **media_trans('users/Videos', 'users/test', create_folder='here',regEx='.*txt')**
 
-
+### 4. Timer
+Simple countdown timer and string_to_timedelta function which I needed for the Pomodoro timer.
 
 
 
