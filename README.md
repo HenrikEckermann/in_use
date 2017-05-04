@@ -1,7 +1,7 @@
 # Own
 
 #### Here I will upload self written programs that I created mostly for exercise purposes. Below you find them listed with a short explanation. If you find that I made mistakes or that code style could be much better, please give me feedback. Also, if you have any suggestions on how to improve things, let me know. 
-All programs work fine on my computer. Of course you may need to modify the folder-names.
+All programs work fine on my computer (MAC OS - Anaconda). You would need to modify the folder-names.
 
 Take the investment.py with a grain of salt as this is an extremely oversimplified and unrealistic model. It may help to calculate how a diversified portfolio can develop IF you modify the return methods. 
 
@@ -9,7 +9,7 @@ Take the investment.py with a grain of salt as this is an extremely oversimplifi
 
 Note:
 1. You need timer.py for this one.
-2. The sound will only work on Mac OS (tested on Sierra). Use winsound for winodws and there are alternatives for Linux.
+2. The sound will only work on Mac OS (tested on Sierra). Use winsound for Winodws and there are alternatives for Linux.
 
 Pomodoro is a technique that helps you to stay motivated and to focus on your tasks: You choose a task and specify the duration you will focus on the task without letting distract you from anything like social media, phone, other tasks etc.. Then you set the timer and begin to work. Do not interrupt the task until the time is over to train focus control. If you do not manage to focus for e.g. 25min, choose shorter time intervals. You may also choose a longer time interval but it is recommended to make a short break ever 25-35 minutes. Thus, when the time is over, make a short break of about 5 minutes. After 4 25 min cycles, make a longer break of at least 25 min. Go out for a walk or do anything that does not require you the focus effort so that you brain can rest.
 
@@ -76,7 +76,7 @@ Imagine you recorded videos with your smartphone and you want to copy them onto 
 **media_trans('users/Videos', 'users/test', create_folder='here',regEx='.*txt')**
 
 ### 4. Timer
-Simple countdown timer and string_to_timedelta function which I needed for the Pomodoro timer.
+Simple countdown timer and string_to_timedelta function that I needed for the Pomodoro timer.
 
 
 
