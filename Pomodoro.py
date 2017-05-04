@@ -42,7 +42,7 @@ def pom_infinite():
     data_new = data_new[['Tasks','Duration']]
         
 
-def pom_man(task,duration,seconds=0):
+def pom_man(task,duration):
     ''' Makes manual entry in the pomodoro data.
         Task is a string and duration a tuple where specify hours and minutes:
         E.g.: pom_man('Learned Statistics', (1,30)).
@@ -51,7 +51,7 @@ def pom_man(task,duration,seconds=0):
     y,m,d,h,minute = ds[0],ds[1],ds[2],ds[3],ds[4]
     td = datetime.timedelta(hours=duration[0], minutes=duration[1])
     data_dict = {'Tasks': task, 'Duration':td}
-    index = [datetime.datetime(y,m,d,h,minute,seconds)]
+    index = [datetime.datetime(y,m,d,h,minute,0)]
     global data_new
     data_new = pd.DataFrame(data_dict,index =index)
     data_new = data_new[['Tasks','Duration']]
@@ -73,13 +73,18 @@ def pom():
             pom_finite()
         elif inp == '3':
             task=input('Enter Task\n')
-            duration =tuple((int(i) for i in input('Enter duration (h:min)\n').split(':')))
+            if task == '':
+                task = data['Tasks'][-1]
+            duration =[int(i) for i in input('Enter duration (h:min)\n').split(':')]
             pom_man(task,duration)
         else:
             raise ValueError('{} is no valid input'.format(inp))
         data = data.append(data_new)
         data.to_pickle('/Users/henrikeckermann/Documents/workspace/Own/pomodoro.pkl')
     print(data.tail(10))
+    
+def pom_write():
+    data.to_pickle('/Users/henrikeckermann/Documents/workspace/Own/pomodoro.pkl')
     
     
     
