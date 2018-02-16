@@ -4,18 +4,18 @@ def bib_modify(filename):
         '''
         Takes filename of a .bib file as a string, scans the file for all titles and applies correct capitalization to the titles.
         '''
-    #capute indeces of titles in a bibfile
-    indeces = []
+    #capute indices of titles in a bibfile
+    indices = []
     with open(filename, 'rb') as f:
         content = f.readlines()
         decoded = [i.decode() for i in content]
         for i in range(len(decoded)):
             if decoded[i][0:5] == 'title':
-                indeces.append(i)
+                indices.append(i)
     #capture title and apply rules
     pattern = re.compile(r'({{)(.*)(}})') 
     newl =[]
-    for i in indeces:
+    for i in indices:
         cap_ind = [] 
         old = pattern.findall(decoded[i])[0][1].lower().capitalize()
         l = old.split()
@@ -28,8 +28,8 @@ def bib_modify(filename):
         new = 'title = {{' + ' '.join(l) + '}}, \n'
         newl.append(new)
 
-    for i in range(len(indeces)):
-        decoded[indeces[i]] =  newl[i]
+    for i in range(len(indices)):
+        decoded[indices[i]] =  newl[i]
         
     encoded = [i.encode() for i in decoded]  
     with open(filename, 'wb') as f:
