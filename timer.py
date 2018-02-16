@@ -26,7 +26,7 @@ def countdown(days=0):
         left = f_time-datetime.datetime.now()
         print('\r{}'.format(str(left).split('.')[0]),end='')
         time.sleep(1)
-    os.system('say The time is over!')   
+    os.system('say Der Timer is abgelaufen du Hunde-Sohn')   
     
     
     
@@ -39,7 +39,7 @@ def countdown_pom():
         left = f_time-datetime.datetime.now()
         print('\r{}'.format(str(left).split('.')[0]),end='')
         time.sleep(1)
-    os.system('say The time is over')
+    os.system('say Der Timer is abgelaufen du Hunde-Sohn')
     return td
     
     

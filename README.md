@@ -1,9 +1,20 @@
 # Own
 
-#### Here I will upload self written programs that I created mostly for exercise purposes. Below you find them listed with a short explanation. If you find that I made mistakes or that code style could be much better, please give me feedback. Also, if you have any suggestions on how to improve things, let me know. 
-All programs work fine on MAC OS with Anaconda.
+This repository contains modules that I wrote for my own workflow or that haven been created for exercise purposes. You should ignore the exercise content. But maybe you find some of the modules at the top useful for your own workflow. I am always happy for feedback for improvement:
 
-Take the investment.py with a grain of salt as this is an extremely oversimplified and unrealistic model. It may help to calculate how a diversified portfolio can develop IF you modify the return methods. 
+## Python Modules
+
+### 1. cite.py  
+- hang_ind will apply hanging indentation. Pandoc cannot apply hanging indentation if you create a docx file. This function will do that. 
+- bib_modify will apply correct capitalization (Apa6th) to titles that are stored in a bib file 
+
+
+
+
+
+
+## Exercise stuff
+
 
 ### 1. Pomodoro timer 
 
@@ -26,7 +37,6 @@ If you want to use the countdowntimer, choose option 2.
 
 
 ### 2. simulate investment:
-I wrote this class to excercise general use of Python and PANDAS. It is my second 'program' and I know that this is not the optimal code but it works and reflects my current (March 2017) level of Python. I planned to use PyMC3 to model expected return rates based on past information. This will be the next exercise for me. At this moment the return rate is simply a random value from a normal distribution. For example the return rate of a very low risk investment is simply a random value of a normal distribution: np.random.normal(loc=1.5,scale=1.5).
 
 
 ### How to use:

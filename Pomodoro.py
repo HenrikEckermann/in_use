@@ -10,7 +10,7 @@ import datetime
 import os
 import timer
 
-  
+
 def pom_finite():
     '''Pomodoro timer'''
     task = input('Continue last [Enter] or New [\'string\'+Enter]:\n ')
@@ -18,29 +18,28 @@ def pom_finite():
     if task == '':
         task = data['Tasks'][-1]
     td = timer.countdown_pom()
-    data_dict = {'Tasks': [task], 'Duration':td}
+    data_dict = {'Tasks': [task], 'Duration': td}
     index = [now]
     global data_new
-    data_new = pd.DataFrame(data_dict,index =index)
-    data_new = data_new[['Tasks','Duration']]
-    
-    
+    data_new = pd.DataFrame(data_dict, index=index)
+    data_new = data_new[['Tasks', 'Duration']]
+
 
 def pom_infinite():
-    '''Stores date,time and task after you end program''' 
+    '''Stores date,time and task after you end program'''
     task = input('Continue last [Enter] or New [\'string\'+Enter]:\n ')
     if task == '':
         start = datetime.datetime.now()
         task = data['Tasks'][-1]
     else:
         start = datetime.datetime.now()
-    input(' Press Enter to finish or to pause activity...') 
-    duration = datetime.datetime.now()-start
+    input(' Press Enter to finish or to pause activity...')
+    duration = datetime.datetime.now() - start
     global data_new
-    data_new = pd.DataFrame({'Duration':[duration],'Tasks':[task]})
-    data_new.index=[start]
-    data_new = data_new[['Tasks','Duration']]
-        
+    data_new = pd.DataFrame({'Duration': [duration], 'Tasks': [task]})
+    data_new.index = [start]
+    data_new = data_new[['Tasks', 'Duration']]
+
 
 def pom_man(task,duration):
     ''' Makes manual entry in the pomodoro data.
@@ -48,16 +47,19 @@ def pom_man(task,duration):
         E.g.: pom_man('Learned Statistics', (1,30)).
     '''
     ds = [int(i) for i in input('Type date as follows: 2017 12 24 14 14 \n').split()]
-    y,m,d,h,minute = ds[0],ds[1],ds[2],ds[3],ds[4]
     td = datetime.timedelta(hours=duration[0], minutes=duration[1])
+    if ds == []:
+        index = [datetime.datetime.now()-td]
+    else:
+        y,m,d,h,minute = ds[0],ds[1],ds[2],ds[3],ds[4]
+        index = [datetime.datetime(y,m,d,h,minute,0)]
     data_dict = {'Tasks': task, 'Duration':td}
-    index = [datetime.datetime(y,m,d,h,minute,0)]
     global data_new
     data_new = pd.DataFrame(data_dict,index =index)
     data_new = data_new[['Tasks','Duration']]
 
-  
-    
+
+
 def pom():
     while True:
         global data
@@ -82,15 +84,15 @@ def pom():
         data = data.append(data_new)
         data.to_pickle('/Users/henrikeckermann/Documents/workspace/Own/pomodoro.pkl')
     print(data.tail(10))
-    
+
 def pom_write():
     data.to_pickle('/Users/henrikeckermann/Documents/workspace/Own/pomodoro.pkl')
-    
-    
-    
-        
-    
-    
-    
-    
+
+
+
+
+
+
+
+
 
