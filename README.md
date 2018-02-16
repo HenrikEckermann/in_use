@@ -5,7 +5,7 @@ This repository contains modules that I wrote for my own workflow or that haven 
 ## Python Modules
 
 ### 1. cite.py  
-- hang_ind will apply hanging indentation. Pandoc cannot apply hanging indentation if you create a docx file. This function will do that. 
+- hang_ind will apply hanging indentation to the reference list in a word document. Pandoc cannot apply hanging indentation if you create a docx file. This function will do that. 
 - bib_modify will apply correct capitalization (Apa6th) to titles that are stored in a bib file 
 
 
