@@ -1,10 +1,4 @@
-import os
 import re
-
-os.getcwd()
-os.chdir('bibtex')
-os.listdir()
-sys.path[1]
 
 def bib_modify(filename):
         '''
