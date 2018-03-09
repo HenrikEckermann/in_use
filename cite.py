@@ -1,9 +1,13 @@
 import re
+from docx import Document
+from docx.shared import Pt, Inches, Length
+
 
 def bib_modify(filename):
-        '''
-        Takes filename of a .bib file as a string, scans the file for all titles and applies correct capitalization to the titles.
-        '''
+    
+    '''
+    Takes filename of a .bib file as a string, scans the file for all titles and applies correct capitalization to the titles.
+    '''
     #collect indices of titles in bibfile
     indices = []
     with open(filename, 'rb') as f:
@@ -41,9 +45,6 @@ def hang_ind(filename):
     '''
     Takes a docx filename out of cwd as string, searches for a paragraph that equals 'References' in that document and adds hanging ident and double spacing to all following paragraphs.
     '''
-    #import modules
-    from docx import Document
-    from docx.shared import Pt, Inches, Length
     #load document 
     doc = Document(filename)
     #number of paragraphs
@@ -64,9 +65,6 @@ def rb_hang_ind(filename):
     '''
     Takes a docx filename out of cwd as string, searches for a paragraph that equals 'References' in that document and adds hanging ident and double spacing to all following paragraphs.
     '''
-    #import modules
-    from docx import Document
-    from docx.shared import Pt, Inches, Length
     #load document 
     doc = Document(filename)
     #number of paragraphs
