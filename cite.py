@@ -43,7 +43,7 @@ def bib_modify(filename):
 
 def hang_ind(filename, doublespace=True):
     '''
-    Takes a docx filename out of cwd as string, searches for a paragraph that equals 'References' in that document and adds hanging ident and double spacing to all following paragraphs.
+    Takes a docx filename in cwd as string, searches for a paragraph that equals 'References' in that document and adds hanging ident. Default: Adds also double spacing to all following paragraphs.
     '''
     #load document 
     doc = Document(filename)
