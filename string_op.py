@@ -1,5 +1,6 @@
 import os
 import re
+import shutil
 
 
 def s_replace(filename, old_string, new_string, copy=True):
