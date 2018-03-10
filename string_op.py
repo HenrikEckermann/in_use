@@ -9,11 +9,10 @@ def s_replace(filename, old_string, new_string, copy=True):
     
     if copy:
         name_split = filename.split('.')
-        shutil.copy(filename, f"{name_split[0]}_copy.{name_split[1]}")
+        shutil.copy(filename, f"{name_split[0]}_copy.{name_split[-1]}")
     with open(filename, 'r') as f:
         content = f.read()
     with open(filename, 'w') as f:
         new_content = re.sub(r'{}'.format(old_string), new_string, content)
         f.write(new_content)
     print('DONE')
-    

@@ -43,7 +43,7 @@ def bib_modify(filename):
 
 def hang_ind(filename, doublespace=True):
     '''
-    Takes a docx filename in cwd as string, searches for a paragraph that equals 'References' in that document and adds hanging ident. Default: Adds also double spacing to all following paragraphs.
+    Takes a docx filename in cwd as string, searches for a paragraph that equals 'References' in that document and adds hanging ident. Default: Adds also double spacing to all following paragraphs. Saves output in new file. Sourcefile unchanged.
     '''
     #load document 
     doc = Document(filename)
@@ -59,12 +59,13 @@ def hang_ind(filename, doublespace=True):
         doc.paragraphs[p].paragraph_format.first_line_indent = Inches(-0.5)
         if doublespace:
             doc.paragraphs[p].paragraph_format.line_spacing = 2.0
-    doc.save('hang_ind_{}'.format(filename))
+    name_split = filename.split('.')
+    doc.save(f'{name_split[0]}_apa.{name_split[-1]}')
     
     
 def rb_hang_ind(filename, doublespace=True):
     '''
-    Takes a docx filename out of cwd as string, searches for a paragraph that equals 'References' in that document and adds hanging ident and double spacing to all following paragraphs.
+    Takes a docx filename in cwd as string, searches for a paragraph that equals 'References' in that document and adds hanging ident. Default: Adds also double spacing to all following paragraphs. Saves output in new file. Sourcefile unchanged.
     '''
     #load document 
     doc = Document(filename)
@@ -83,7 +84,8 @@ def rb_hang_ind(filename, doublespace=True):
         if doublespace:
             doc.paragraphs[p].paragraph_format.line_spacing = 2.0
 
-    doc.save('hang_ind_{}'.format(filename))
+    name_split = filename.split('.')
+    doc.save(f'{name_split[0]}_apa.{name_split[-1]}')
     
 
 
