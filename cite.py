@@ -63,6 +63,7 @@ def hang_ind(filename, doublespace=True):
     doc.save(f'{name_split[0]}_apa.{name_split[-1]}')
 
 
+
 def rb_hang_ind(filename, doublespace=True):
     '''
     Takes a docx filename in cwd as string, searches for a paragraph that equals 'References' in that document and adds hanging ident. Default: Adds also double spacing to all following paragraphs. Saves output in new file. Sourcefile unchanged.
@@ -86,5 +87,3 @@ def rb_hang_ind(filename, doublespace=True):
 
     name_split = filename.split('.')
     doc.save(f'{name_split[0]}_apa.{name_split[-1]}')
-
-    
