@@ -3,8 +3,8 @@ import re
 import shutil
 
 def search_r_files(directory):
-    '''searches directory including subfolders for files that end with .R or
-     .Rmd and returns list of complete paths.'''
+    '''searches directory including subfolders for files that end with .R or 
+    .Rmd and returns list of complete paths.'''
 
     pattern = re.compile(r"([\w|\d]+)(\.R)(md)?$", re.I)
     collected_files = []
