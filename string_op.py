@@ -5,7 +5,7 @@ import shutil
 def search_r_files(directory):
     '''searches directory including subfolders for files that end with .R or .Rmd and returns list of complete paths.'''
 
-    pattern = re.compile(r"([\w|\d]+)(\.R)(md)?$")
+    pattern = re.compile(r"([\w|\d]+)(\.R)(md)?$", re.I)
     collected_files = []
     for path, dirs, files in os.walk(directory):
         for file in files:
@@ -32,17 +32,15 @@ def find_pkgs_to_install(files_or_dir, preinstalled = [], is_dir = False):
             for match in matches:
                 if f"'{match.group(2)}'" not in list_of_pkgs and match.group(2) not in preinstalled:
                     list_of_pkgs.append(f"'{match.group(2)}'")
+    list_of_pkgs.sort()
     list_of_pkgs = ", ".join(list_of_pkgs)
     return(f"install.packages(c({list_of_pkgs}), dependencies = T)")
     
 
 
 
-
-
 # #example for own use:
-# print(find_pkgs_to_install(f'{os.path.expanduser("~")}/Documents/workspace/research_master', is_dir = True))
-
+# print(find_pkgs_to_install(f'{os.path.expanduser("~")}/Documents/workspace/', is_dir = True))
 
 
 # you can just use pattern.sub where pattern is an object created with re 
