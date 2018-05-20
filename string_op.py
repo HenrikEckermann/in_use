@@ -15,10 +15,10 @@ def search_r_files(directory):
     return(collected_files)
 
 
-def find_pkgs_to_install(files_or_dir, preinstalled = [], is_dir = False):
+def find_pkgs_to_install(files_or_dir, is_dir = False):
     '''If files: Collects all loaded R packages in file and returns ready to
      use command to install those packages. If dir: Searches in dir for files
-     to use first. Ignores list of packages preinstalled'''
+     to use first.'''
     
     if is_dir:
         files = search_r_files(files_or_dir)
@@ -33,7 +33,7 @@ def find_pkgs_to_install(files_or_dir, preinstalled = [], is_dir = False):
         for pattern in patterns:
             matches = pattern.finditer(content)
             for match in matches:
-                if f"'{match.group(2)}'" not in list_of_pkgs and match.group(2) not in preinstalled:
+                if f"'{match.group(2)}'" not in list_of_pkgs:
                     list_of_pkgs.append(f"'{match.group(2)}'")
     list_of_pkgs.sort()
     list_of_pkgs = ", ".join(list_of_pkgs)
