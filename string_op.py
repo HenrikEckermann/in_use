@@ -41,27 +41,30 @@ def find_pkgs_to_install(files_or_dir, is_dir=False):
     list_of_pkgs.sort()
     list_of_pkgs = ", ".join(list_of_pkgs)
     o_br, c_br = ("{", "}")
-    return(f'for (pkg in c({list_of_pkgs})){o_br}\n  if (!require(pkg)){o_br}\n    install.packages(pkg, dependencies = T)\n  {c_br}\n{c_br}')
+    return(f'for (pkg in c({list_of_pkgs})){o_br}\n  if (!pkg %in% installed.packages()) {o_br}\n    install.packages(pkg, dependencies = T)\n  {c_br}\n{c_br}')
 
 
 # # examples for own use:
 # print(find_pkgs_to_install(f'{os.path.expanduser("~")}/dropbox', is_dir=True))
-# # output:
-# for (pkg in c('car', 'emmeans', 'foreign', 'glue', 'kableExtra', 'knitr', 'papaja', 'qwraps2', 'readxl', 'rmarkdown', 'tidyverse')){
-#   if (!require(pkg)){
+# # for (pkg in c('car', 'emmeans', 'foreign', 'glue', 'kableExtra', 'knitr', 'papaja', 'qwraps2', 'readxl', 'rmarkdown', 'tidyverse')){
+#   if (!pkg %in% installed.packages()) {
 #     install.packages(pkg, dependencies = T)
 #   }
 # }
-# print(find_pkgs_to_install(f'{os.path.expanduser("~")}/Documents/workspace/website/mysite/main/templates', is_dir=True))
+# print(find_pkgs_to_install(
+#     f'{os.path.expanduser("~")}/Documents/workspace/website/mysite/main/templates', is_dir=True))
 # # output
 # for (pkg in c('Hmisc', 'MASS', 'VIM', 'afex', 'aplore3', 'arm', 'blmeco', 'car', 'dplyr', 'effects', 'ez', 'foreign', 'ggplot2', 'glue', 'gmodels', 'knitr', 'lattice', 'lmtest', 'ltm', 'mlogit', 'multcomp', 'pander', 'papaja', 'pastecs', 'plyr', 'psych', 'purrr', 'rafalib', 'reshape', 'reshape2', 'rmarkdown', 'stringr', 'tidyverse', 'viridis')){
-#   if (!require(pkg)){
+#   if (!pkg %in% installed.packages()) {
 #     install.packages(pkg, dependencies = T)
 #   }
 # }
 
+
 # you can just use pattern.sub where pattern is an object created with re
 # I was  obviously not aware of that while writing the function
+
+
 def s_replace(filename, old_string, new_string, copy=True):
     '''
     Changes the input file by replacing old_string (which can be regex) with
