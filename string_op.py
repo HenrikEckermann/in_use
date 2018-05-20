@@ -40,7 +40,7 @@ def find_pkgs_to_install(files_or_dir, preinstalled = [], is_dir = False):
 
 
 # #example for own use:
-# print(find_pkgs_to_install(f'{os.path.expanduser("~")}/Documents/workspace/', is_dir = True))
+# print(find_pkgs_to_install(f'{os.path.expanduser("~")}/Documents/workspace/', is_dir = True)) 
 
 
 # you can just use pattern.sub where pattern is an object created with re 
