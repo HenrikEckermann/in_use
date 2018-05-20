@@ -37,13 +37,18 @@ def find_pkgs_to_install(files_or_dir, preinstalled = [], is_dir = False):
                     list_of_pkgs.append(f"'{match.group(2)}'")
     list_of_pkgs.sort()
     list_of_pkgs = ", ".join(list_of_pkgs)
-    return(f"install.packages(c({list_of_pkgs}), dependencies = T)")
+    o_br, c_br = ("{", "}")
+    return(f'for (pkg in c({list_of_pkgs})){o_br}\n  if (!require(pkg)){o_br}\n    install.packages(pkg, dependencies = T)\n  {c_br}\n{c_br}')
     
-
-
-
+    
 # #example for own use:
 # print(find_pkgs_to_install(f'{os.path.expanduser("~")}/Documents/workspace/', is_dir = True)) 
+# 
+# for (pkg in c('BayesFactor', 'BaylorEdPsych', 'Biostrings', 'DESeq2', 'DT', 'DescTools', 'GGally', 'GPArotation', 'Hmisc', 'MASS', 'MBESS', 'MVN', 'RColorBrewer', 'Rcpp', 'TOSTER', 'VIM', 'afex', 'ape', 'aplore3', 'arm', 'blmeco', 'boot', 'brms', 'broom', 'car', 'corpcor', 'devtools', 'dplyr', 'effects', 'emmeans', 'ez', 'foreign', 'gdata', 'ggcorrplot', 'ggplot2', 'ggpubr', 'ggrepel', 'ggthemes', 'glue', 'gmodels', 'gridExtra', 'gvlma', 'inline', 'kableExtra', 'knitr', 'lattice', 'lavaan', 'lme4', 'lmtest', 'ltm', 'metafor', 'mice', 'microbiome', 'mlogit', 'multcomp', 'mvnormtest', 'mvoutlier', 'pander', 'papaja', 'parallel', 'pastecs', 'pbkrtest', 'phyloseq', 'picante', 'plyr', 'polycor', 'psych', 'purrr', 'pwr', 'qwraps2', 'rafalib', 'readxl', 'rela', 'reshape', 'reshape2', 'rmarkdown', 'rstan', 'scales', 'semPlot', 'semTools', 'shiny', 'shinythemes', 'sjPlot', 'stringr', 'tidyverse', 'toOrdinal', 'truncnorm', 'vegan', 'viridis', 'wec')){
+#   if (!require(pkg)){
+#     install.packages(pkg, dependencies = T)
+#   }
+# }
 
 
 # you can just use pattern.sub where pattern is an object created with re 
