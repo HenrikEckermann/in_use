@@ -15,7 +15,9 @@ def search_r_files(directory):
 
 
 def find_pkgs_to_install(files_or_dir, preinstalled = [], is_dir = False):
-    '''If files: Collects all loaded R packages in file and returns ready to use command to install those packages. If dir: Searches in dir for files to use first. Ignores list of packages preinstalled'''
+    '''If files: Collects all loaded R packages in file and returns ready to
+     use command to install those packages. If dir: Searches in dir for files
+     to use first. Ignores list of packages preinstalled'''
     
     if is_dir:
         files = search_r_files(files_or_dir)
@@ -47,7 +49,9 @@ def find_pkgs_to_install(files_or_dir, preinstalled = [], is_dir = False):
 # I was  obviously not aware of that while writing the function
 def s_replace(filename, old_string, new_string, copy=True):
     '''
-    Changes the input file by replacing old_string (which can be regex) with new_string and prints 'DONE'. With the default (copy==True), a copy of the file is created before.
+    Changes the input file by replacing old_string (which can be regex) with
+     new_string and prints 'DONE'. With the default (copy==True), a copy of the
+     file is created before.
     ''' 
     
     if copy:
