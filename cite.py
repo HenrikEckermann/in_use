@@ -1,6 +1,7 @@
 import re
 from docx import Document
 from docx.shared import Pt, Inches, Length
+import pypandoc
 
 
 def bib_modify(filename):
@@ -87,3 +88,14 @@ def rb_hang_ind(filename, doublespace=True):
 
     name_split = filename.split('.')
     doc.save(f'{name_split[0]}_apa.{name_split[-1]}')
+
+
+
+
+
+# import os
+# os.chdir(os.path.expanduser("~/Documents/workspace/research_master/dpb/minor_research_project/article/"))
+# os.listdir()
+# 
+# output = pypandoc.convert_file("article.Rmd", "docx", outputfile = "test.docx", format = "md")
+
