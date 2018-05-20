@@ -42,13 +42,14 @@ def find_pkgs_to_install(files_or_dir, is_dir = False):
     
     
 # #example for own use:
-# print(find_pkgs_to_install(f'{os.path.expanduser("~")}/Documents/workspace/', is_dir = True)) 
-# 
-# for (pkg in c('BayesFactor', 'BaylorEdPsych', 'Biostrings', 'DESeq2', 'DT', 'DescTools', 'GGally', 'GPArotation', 'Hmisc', 'MASS', 'MBESS', 'MVN', 'RColorBrewer', 'Rcpp', 'TOSTER', 'VIM', 'afex', 'ape', 'aplore3', 'arm', 'blmeco', 'boot', 'brms', 'broom', 'car', 'corpcor', 'devtools', 'dplyr', 'effects', 'emmeans', 'ez', 'foreign', 'gdata', 'ggcorrplot', 'ggplot2', 'ggpubr', 'ggrepel', 'ggthemes', 'glue', 'gmodels', 'gridExtra', 'gvlma', 'inline', 'kableExtra', 'knitr', 'lattice', 'lavaan', 'lme4', 'lmtest', 'ltm', 'metafor', 'mice', 'microbiome', 'mlogit', 'multcomp', 'mvnormtest', 'mvoutlier', 'pander', 'papaja', 'parallel', 'pastecs', 'pbkrtest', 'phyloseq', 'picante', 'plyr', 'polycor', 'psych', 'purrr', 'pwr', 'qwraps2', 'rafalib', 'readxl', 'rela', 'reshape', 'reshape2', 'rmarkdown', 'rstan', 'scales', 'semPlot', 'semTools', 'shiny', 'shinythemes', 'sjPlot', 'stringr', 'tidyverse', 'toOrdinal', 'truncnorm', 'vegan', 'viridis', 'wec')){
+# print(find_pkgs_to_install(f'{os.path.expanduser("~")}/dropbox', is_dir = True)) 
+# # 
+# for (pkg in c('car', 'emmeans', 'foreign', 'glue', 'kableExtra', 'knitr', 'papaja', 'qwraps2', 'readxl', 'rmarkdown', 'tidyverse')){
 #   if (!require(pkg)){
 #     install.packages(pkg, dependencies = T)
 #   }
-# }
+}
+
 
 
 # you can just use pattern.sub where pattern is an object created with re 
