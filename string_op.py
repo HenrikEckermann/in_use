@@ -17,9 +17,7 @@ def search_r_files(directory):
 
 
 def find_pkgs_to_install(files_or_dir, is_dir=False):
-    '''If files: Collects all loaded R packages in file and returns ready to
-     use command to install those packages. If dir: Searches in dir for files
-     to use first.'''
+    '''If is_dir: Searches in the folder files_or_dir for files first and uses them, else uses files specified in files_or_dir. Collects all loaded R packages in the R code and returns ready to use command to install those packages. '''
 
     if is_dir:
         files = search_r_files(files_or_dir)
