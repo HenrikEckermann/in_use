@@ -42,9 +42,9 @@ def find_pkgs_to_install(files_or_dir, is_dir=False):
     return(f'for (pkg in c({list_of_pkgs})){o_br}\n  if (!pkg %in% installed.packages()) {o_br}\n    install.packages(pkg, dependencies = T)\n  {c_br}\n{c_br}')
 
 
-# # examples for own use:
+# examples for own use:
 # print(find_pkgs_to_install(f'{os.path.expanduser("~")}/dropbox', is_dir=True))
-# # for (pkg in c('car', 'emmeans', 'foreign', 'glue', 'kableExtra', 'knitr', 'papaja', 'qwraps2', 'readxl', 'rmarkdown', 'tidyverse')){
+# for (pkg in c('car', 'emmeans', 'foreign', 'glue', 'kableExtra', 'knitr', 'papaja', 'qwraps2', 'readxl', 'rmarkdown', 'tidyverse')){
 #   if (!pkg %in% installed.packages()) {
 #     install.packages(pkg, dependencies = T)
 #   }
@@ -58,6 +58,8 @@ def find_pkgs_to_install(files_or_dir, is_dir=False):
 #   }
 # }
 
+
+print(find_pkgs_to_install(f'{os.path.expanduser("~")}/Documents/workspace/research_master/block_3', is_dir=True))
 
 # you can just use pattern.sub where pattern is an object created with re
 # I was  obviously not aware of that while writing the function
