@@ -59,7 +59,7 @@ def find_pkgs_to_install(files_or_dir, is_dir=False):
 # }
 
 
-print(find_pkgs_to_install(f'{os.path.expanduser("~")}/Documents/workspace/research_master/block_3', is_dir=True))
+# print(find_pkgs_to_install(f'{os.path.expanduser("~")}/Documents/workspace/research_master/block_3', is_dir=True))
 
 # you can just use pattern.sub where pattern is an object created with re
 # I was  obviously not aware of that while writing the function

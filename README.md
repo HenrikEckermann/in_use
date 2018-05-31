@@ -4,7 +4,7 @@
 
 ### 2. string_op.py
 - added two functions that search r code for pkg like either `library(pkg)` or `pkg::` and returns useable `install.packages(...)` statement for use in R. 
-- s_replace screens a file for a regex and replaces matches by given string &rarr; this function is unneccessary because re.sub already could do that and more.
+- s_replace screens a file for a regex and replaces matches by string. Since this function uses re.sub, the new string can be group matches of defined groups. E.g. if you copy text from a word file that contains numbered headers you could use this to use markdown headers: `s_replace("somefile.Rmd", r"(\s{2,})(\d{1,2}\.\s)", r"\n\n##### \2", copy = False)` 
 
 
 
