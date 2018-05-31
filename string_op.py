@@ -65,11 +65,10 @@ def find_pkgs_to_install(files_or_dir, is_dir=False):
 # I was  obviously not aware of that while writing the function
 
 
-def s_replace(filename, old_string, new_string, copy=True):
+def s_replace(filename, old_string, new_string, copy = False):
     '''
     Changes the input file by replacing old_string (which can be regex) with
-     new_string and prints 'DONE'. With the default (copy==True), a copy of the
-     file is created before.
+     new_string and prints 'DONE'. You can create a copy before changing the file  by setting (copy==True).
     '''
 
     if copy:
@@ -82,5 +81,4 @@ def s_replace(filename, old_string, new_string, copy=True):
         f.write(new_content)
     print('DONE')
 
-# example for substitution
-# subbed_content = pattern.sub(r'install.packages\2', content)
+
