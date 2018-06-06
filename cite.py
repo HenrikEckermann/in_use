@@ -1,8 +1,18 @@
 import re
 from docx import Document
 from docx.shared import Pt, Inches, Length
-import pypandoc
+import os
 
+def create_bibfile(bib = f'{os.path.expanduser("~")}/workspace/bibtex/library.bib', bib_r = 'r_references.bib'):
+    '''Merges two bibfiles and creates new bibfile in cwd'''
+    with open(bib_r, "r") as f:
+        packages = f.read()
+    with open(bib, "r") as f:
+        library = f.read()
+    with open("references.bib", "w+") as bib_all:
+        bib_all.write(packages + library)
+    
+    
 
 def bib_modify(filename):
 
@@ -43,9 +53,9 @@ def bib_modify(filename):
 
 
 def hang_ind(filename, doublespace=True):
-    '''
-    Takes a docx filename in cwd as string, searches for a paragraph that equals 'References' in that document and adds hanging ident. Default: Adds also double spacing to all following paragraphs. Saves output in new file. Sourcefile unchanged.
-    '''
+    '''Takes a docx filename in cwd as string, searches for a paragraph that equals 'References'
+    in that document and adds hanging ident. Default: Adds also double spacing to all following paragraphs. Saves output in new file. Sourcefile unchanged.'''
+    
     #load document
     doc = Document(filename)
     #number of paragraphs
@@ -66,9 +76,9 @@ def hang_ind(filename, doublespace=True):
 
 
 def rb_hang_ind(filename, doublespace=True):
-    '''
-    Takes a docx filename in cwd as string, searches for a paragraph that equals 'References' in that document and adds hanging ident. Default: Adds also double spacing to all following paragraphs. Saves output in new file. Sourcefile unchanged.
-    '''
+    '''Takes a docx filename in cwd as string, searches for a paragraph that equals 'References'
+    in that document and adds hanging ident. Default: Adds also double spacing to all following paragraphs. 
+    Saves output in new file. Sourcefile unchanged.'''
     #load document
     doc = Document(filename)
     #number of paragraphs
@@ -93,9 +103,4 @@ def rb_hang_ind(filename, doublespace=True):
 
 
 
-# import os
-# os.chdir(os.path.expanduser("~/Documents/workspace/research_master/dpb/minor_research_project/article/"))
-# os.listdir()
-# 
-# output = pypandoc.convert_file("article.Rmd", "docx", outputfile = "test.docx", format = "md")
 

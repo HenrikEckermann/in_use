@@ -4,7 +4,9 @@ import shutil
 
 
 def search_r_files(directory):
-    '''searches directory including subfolders for files that end with .R or 
+    '''searches directory including 
+    
+    folders for files that end with .R or 
     .Rmd and returns list of complete paths.'''
 
     pattern = re.compile(r"([\w|\d]+)(\.R)(md)?$", re.I)
@@ -40,6 +42,26 @@ def find_pkgs_to_install(files_or_dir, is_dir=False):
     list_of_pkgs = ", ".join(list_of_pkgs)
     o_br, c_br = ("{", "}")
     return(f'for (pkg in c({list_of_pkgs})){o_br}\n  if (!pkg %in% installed.packages()) {o_br}\n    install.packages(pkg, dependencies = T)\n  {c_br}\n{c_br}')
+
+def return_pkgs(files):
+    '''Return list of loaded packages to use in R that have been mentioned in the form of pkg:: or library(pkg)
+    in files, which can also be a list of files'''
+
+    list_of_pkgs = []
+    patterns = [re.compile(r'(library|require)\(([\w\d]+)\)'),
+                re.compile(r'(\s|\\n)([\w|\d]+)(::)')]
+    if type(files) != list:
+        files = [files]
+    for file in files:
+        with open(file, "r", encoding="utf-8") as f:
+            content = f.read()
+        for pattern in patterns:
+            matches = pattern.finditer(content)
+            for match in matches:
+                if match.group(2) not in list_of_pkgs:
+                    list_of_pkgs.append(match.group(2))
+    list_of_pkgs.sort()
+    return(list_of_pkgs)
 
 
 # examples for own use:
