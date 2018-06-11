@@ -4,7 +4,7 @@ from docx.shared import Pt, Inches, Length
 import os
 
 def create_bibfile(bib = f'{os.path.expanduser("~")}/workspace/bibtex/library.bib', bib_r = 'r_references.bib'):
-    '''Merges two bibfiles and creates new bibfile in cwd'''
+    '''Merges two bibfiles and creates new bibfile in cwd. Specify your own locations. Created to use python from within Rstudio R Notebook.'''
     with open(bib_r, "r") as f:
         packages = f.read()
     with open(bib, "r") as f:

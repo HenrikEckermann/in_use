@@ -5,18 +5,24 @@ library(glue)
 ### --- for LME --- ###
 
 # returns apa p value as a string 
-report_p <- function(p) {
-  ifelse(p < 0.001, paste('_p_ <', '.001'),  paste('_p_ =', substring(as.character(p), 2,5)))
+report_p <- function(p, p_str = T) {
+  if(p_str) {
+    ifelse(p < 0.001, paste('_p_ <', '.001'),  paste('_p_ =', substring(as.character(p), 2,5)))
+  }else{
+    ifelse(p < 0.001, '< .001',  substring(as.character(format(p, nsmall =3)), 2,5))
+  }
 }
+
+
 
 # same as above but returns *, ** or ***
 report_star <- function(p) {
   return(ifelse(p < 0.001, '***', ifelse(p < 0.01, '**', ifelse(p < 0.05, '*', ' '))))
 }
 
-# same as above but returns *, ** or ***
+# same as above but for latex 
 report_star_latex <- function(value, p) {
-  return(ifelse(p < 0.001, glue("$[value]^{***}$", .open = "[", .close = "]"), ifelse(p < 0.01, glue("$[value]^{**}$", .open = "[", .close = "]"), ifelse(p < 0.05, glue("$[value]^{*}$", .open = "[", .close = "]"), ' '))))
+  return(ifelse(p < 0.001, glue("$[value]^{***}$", .open = "[", .close = "]"), ifelse(p < 0.01, glue("$[value]^{**}$", .open = "[", .close = "]"), ifelse(p < 0.05, glue("$[value]^{*}$", .open = "[", .close = "]"), glue("${value}$")))))
 }
 
 
