@@ -1,0 +1,5 @@
+### Workaround for kable version 0.9 table note:
+# pattern to find table note:
+(\\item \\textit{Note.}\s*)(\n\\item)(.*\n)
+# replace with 
+$1$3

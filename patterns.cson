@@ -1,0 +1,25 @@
+"replacing-pattern-collection":
+  options: [
+    {
+      description: ""
+      findPattern: ""
+      replacePattern: ""
+      pathsPattern: ""
+      projectFind: false
+      useRegex: false
+      caseSensitive: false
+      wholeWord: false
+      inCurrentSelection: false
+    }
+    {
+      description: "threeparttable_fix"
+      findPattern: "(\\\\item \\\\textit{Note.}\\s*)(\\n\\\\item)(.*\\n)"
+      replacePattern: "$1$3"
+      pathsPattern: ""
+      projectFind: false
+      useRegex: true
+      caseSensitive: false
+      wholeWord: false
+      inCurrentSelection: false
+    }
+  ]

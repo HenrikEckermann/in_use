@@ -61,10 +61,14 @@ def hang_ind(filename, doublespace=True):
     #number of paragraphs
     n = len(doc.paragraphs)
     #find the reference list
+    start = 0
     for p in range(n):
         if doc.paragraphs[p].text == 'References':
             start = p+1
     #add hanging ident to all following lines (dont use if reflist is not last part)
+    if start == 0:
+        print("Could not find reference list. Please use a header called reference in your document")
+        return(None)
     for p in range(start, n):
         doc.paragraphs[p].paragraph_format.left_indent = Pt(36)
         doc.paragraphs[p].paragraph_format.first_line_indent = Inches(-0.5)
