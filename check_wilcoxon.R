@@ -10,7 +10,7 @@ check_wilcoxon <- function (dat, G1, G2, p.adjust.method = "BH", sort = FALSE, p
           lvl <- levels[i]
           l.g1 <- dat[lvl, G1]
           l.g2 <- dat[lvl, G2]
-          p <- wilcox.test(as.numeric(l.g1), as.numeric(l.g2), paired = paired)$p.value
+          p <- wilcox.test(as.numeric(l.g1), pas.numeric(l.g2), paired = paired)$p.value
           M[i, 1] <- p
       }
       if (!is.null(p.adjust.method)) {
