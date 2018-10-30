@@ -1,3 +1,4 @@
+#
 # since I am used to dplyr for data manipulation I think it might be good to
 # have a fast way to to switch between dataframe/tibble to phyloseq so that 
 # I can use dplyr etc. also here. A requirement for phyloseq object creation is
@@ -10,9 +11,9 @@ library(dplyr)
 # creates list of dfs
 to_dfs <- function(pseq, level = "species", rtc_name = "sample_id") {
   # otu df
-  otu <- as.data.frame(otu_table(pseq)) %>% rownames_to_column(level)
-  sdata <- as.data.frame(sample_data(pseq)) %>% rownames_to_column(rtc_name)
-  taxt <- as.data.frame(tax_table(pseq)) %>% rownames_to_column(level)
+  otu <- as_data_frame(otu_table(pseq)) %>% rownames_to_column(level)
+  sdata <- as_data_frame(sample_data(pseq)) %>% rownames_to_column(rtc_name)
+  taxt <- as_data_frame(tax_table(pseq)) %>% rownames_to_column(level)
   return(list(otu = otu, sdata = sdata, taxt = taxt))
 }
 
@@ -44,7 +45,7 @@ to_pseq <- function(
 
 sd_to_df <- function(pseq, rtc_name = "sample_id") {
     sample_data(pseq) %>%
-    as.data.frame() %>%
+    as_data_frame() %>%
     rownames_to_column(rtc_name)    
 }
 
@@ -57,7 +58,7 @@ df_to_sd <- function(sdata, ctr_name = "sample_id") {
 
 otu_to_df <- function(pseq, level = "species") {
     otu_table(pseq) %>%
-    as.data.frame() %>%
+    as_data_frame() %>%
     rownames_to_column(level)    
 }
 
