@@ -12,7 +12,11 @@ _This repository contains small scripts or files that I use in my workflow._
 - functions to ease reporting in APA6th style for LME4/afex, test statistics etc.
 
 
+### 4. bayesian_helper.R
+- helper functions for bayesian inference workflow with tidyverse and brms/rstan
 
+### 5. mb_helper.R
+- helper functions for microbiota data analyses
 
 
 
