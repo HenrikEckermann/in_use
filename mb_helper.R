@@ -11,9 +11,9 @@ library(dplyr)
 # creates list of dfs
 to_dfs <- function(pseq, level = "species", rtc_name = "sample_id") {
   # otu df
-  otu <- as_data_frame(otu_table(pseq)) %>% rownames_to_column(level)
+  otu <- as.data.frame(otu_table(pseq)) %>% rownames_to_column(level)
   sdata <- as_data_frame(sample_data(pseq)) %>% rownames_to_column(rtc_name)
-  taxt <- as_data_frame(tax_table(pseq)) %>% rownames_to_column(level)
+  taxt <- as.data.frame(tax_table(pseq)) %>% rownames_to_column(level)
   return(list(otu = otu, sdata = sdata, taxt = taxt))
 }
 
@@ -58,7 +58,7 @@ df_to_sd <- function(sdata, ctr_name = "sample_id") {
 
 otu_to_df <- function(pseq, level = "species") {
     otu_table(pseq) %>%
-    as_data_frame() %>%
+    as.data.frame() %>%
     rownames_to_column(level)    
 }
 
