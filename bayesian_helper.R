@@ -1,6 +1,6 @@
 
 ### DONT READ THIS FILE####
-# This document is not well documented. It just contains functions I
+# This document is not well documented. It contains functions I
 # wrote or copied for simulation and model fitting hands on... 
 library(loo)
 library(glue)
