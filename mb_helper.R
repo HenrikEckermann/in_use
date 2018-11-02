@@ -64,7 +64,7 @@ otu_to_df <- function(pseq, level = "species", transpose = TRUE) {
     if (transpose) {
       otu <- 
         otu %>%
-        gather(sample, value, -species) %>%
+        gather(sample_id, value, -species) %>%
         spread(species, value)
     }   
     otu
