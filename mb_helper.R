@@ -56,10 +56,18 @@ df_to_sd <- function(sdata, ctr_name = "sample_id") {
 }
 
 
-otu_to_df <- function(pseq, level = "species") {
-    otu_table(pseq) %>%
-    as.data.frame() %>%
-    rownames_to_column(level)    
+otu_to_df <- function(pseq, level = "species", transpose = TRUE) {
+    otu <- 
+      otu_table(pseq) %>%
+      as.data.frame() %>%
+      rownames_to_column(level) 
+    if (transpose) {
+      otu <- 
+        otu %>%
+        gather(sample, value, -species) %>%
+        spread(species, value)
+    }   
+    otu
 }
 
 df_to_otu <- function(otu, level = "species", taxa_are_rows = TRUE) {
