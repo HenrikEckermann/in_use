@@ -102,7 +102,7 @@ pp_plot <- function(model, sample_number, y_name, lower = 0.3, upper = 0.3) {
         scale_color_discrete(guide = F) +
         geom_density(data = model$data, aes_q(as.name(y_name), group = "none"), size = 1.5) +
         xlim(c(lower, upper)) +
-        ggtitle(plot_title)
+        ggtitle(glue("{plot_title}:{y_name}"))
 }
 
 
@@ -137,7 +137,7 @@ pp_plot_v <- function(model, sample_number, y_name, lower = 0.3, upper = 0.3) {
         geom_violin(data = model$data, aes_q(0, as.name(y_name), group = "none"), color = "firebrick") +
         geom_boxplot(data = model$data, aes_q(0, as.name(y_name), group = "none"), width = 0.08, outlier.size = 0.5) +
         coord_flip() +
-        ggtitle(plot_title)
+        ggtitle(glue("{plot_title}:{y_name}"))
 }
 
 # use violin + points for pp check
@@ -172,7 +172,7 @@ pp_plot_v2 <- function(model, sample_number, y_name, lower = 0.3, upper = 0.3) {
         geom_jitter(data = model$data, aes_q(0, as.name(y_name), group = "none"), alpha = 0.5, width = 0.1) +
         ylim(c(lower, upper)) +
         coord_flip() +
-        ggtitle(plot_title)
+        ggtitle(glue("{plot_title}:{y_name}"))
 }
 
 
