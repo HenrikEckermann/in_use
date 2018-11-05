@@ -86,14 +86,14 @@ pp_plot <- function(model, sample_number, y_name, lower = 0.3, upper = 0.3) {
   # in case I use brms multiple imputation, pp_plot_data has 3 dim
   n_dim <- pp_plot_data %>% dim() %>% length()
   # brms substitues "_" by ""
-  y_name <- gsub("_", "", y_name)
-  if (n_dim == 3) pp_plot_data <- pp_plot_data[, , y_name]
+  y_name_sub <- gsub("_", "", y_name)
+  if (n_dim == 3) pp_plot_data <- pp_plot_data[, , y_name_sub]
   pp_plot_data <- pp_plot_data %>% t() %>% as.tibble()
   # number of datasets
   n <- dim(pp_plot_data)[2]
   pp_plot_data <- select(pp_plot_data, sample(1:n, sample_number, replace = F))
   plot_title <- ifelse(n_dim == 3, 
-    as.character(model$family[[y_name]])[1], 
+    as.character(model$family[[y_name_sub]])[1], 
     as.character(model$family)[1])
   p <- pp_plot_data %>%
         gather %>%
@@ -119,12 +119,15 @@ pp_plot_v <- function(model, sample_number, y_name, lower = 0.3, upper = 0.3) {
   # in case I use brms multiple imputation, pp_plot_data has 3 dim
   n_dim <- pp_plot_data %>% dim() %>% length()
   # brms substitues "_" by ""
-  y_name <- gsub("_", "", y_name)
-  if (n_dim == 3) pp_plot_data <- pp_plot_data[, , y_name]
+  y_name_sub <- gsub("_", "", y_name)
+  if (n_dim == 3) pp_plot_data <- pp_plot_data[, , y_name_sub]
   pp_plot_data <- pp_plot_data %>% t() %>% as.tibble()
   # number of datasets
   n <- dim(pp_plot_data)[2]
   pp_plot_data <- select(pp_plot_data, sample(1:n, sample_number, replace = F))
+  plot_title <- ifelse(n_dim == 3, 
+    as.character(model$family[[y_name_sub]])[1], 
+    as.character(model$family)[1])
   p <- pp_plot_data %>%
         gather %>%
         ggplot(aes(key, value, group = key)) +
@@ -134,7 +137,7 @@ pp_plot_v <- function(model, sample_number, y_name, lower = 0.3, upper = 0.3) {
         geom_violin(data = model$data, aes_q(0, as.name(y_name), group = "none"), color = "firebrick") +
         geom_boxplot(data = model$data, aes_q(0, as.name(y_name), group = "none"), width = 0.08, outlier.size = 0.5) +
         coord_flip() +
-        ggtitle(as.character(model$family)[1])
+        ggtitle(plot_title)
 }
 
 # use violin + points for pp check
@@ -150,12 +153,15 @@ pp_plot_v2 <- function(model, sample_number, y_name, lower = 0.3, upper = 0.3) {
   # in case I use brms multiple imputation, pp_plot_data has 3 dim
   n_dim <- pp_plot_data %>% dim() %>% length()
   # brms substitues "_" by ""
-  y_name <- gsub("_", "", y_name)
-  if (n_dim == 3) pp_plot_data <- pp_plot_data[, , y_name]
+  y_name_sub <- gsub("_", "", y_name)
+  if (n_dim == 3) pp_plot_data <- pp_plot_data[, , y_name_sub]
   pp_plot_data <- pp_plot_data %>% t() %>% as.tibble()
   # number of datasets
   n <- dim(pp_plot_data)[2]
   pp_plot_data <- select(pp_plot_data, sample(1:n, sample_number, replace = F))
+  plot_title <- ifelse(n_dim == 3, 
+    as.character(model$family[[y_name_sub]])[1], 
+    as.character(model$family)[1])
   p <- pp_plot_data %>%
         gather %>%
         ggplot(aes(key, value, group = key)) +
@@ -166,7 +172,7 @@ pp_plot_v2 <- function(model, sample_number, y_name, lower = 0.3, upper = 0.3) {
         geom_jitter(data = model$data, aes_q(0, as.name(y_name), group = "none"), alpha = 0.5, width = 0.1) +
         ylim(c(lower, upper)) +
         coord_flip() +
-        ggtitle(as.character(model$family)[1])
+        ggtitle(as.character(plot_title)
 }
 
 
