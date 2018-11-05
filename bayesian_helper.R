@@ -85,6 +85,8 @@ pp_plot <- function(model, sample_number, y_name, lower = 0.3, upper = 0.3) {
   pp_plot_data <- posterior_predict(model)
   # in case I use brms multiple imputation, pp_plot_data has 3 dim
   n_dim <- pp_plot_data %>% dim() %>% length()
+  # brms substitues "_" by ""
+  y_name <- gsub("_", "", y_name)
   if (n_dim == 3) pp_plot_data <- pp_plot_data[, , y_name]
   pp_plot_data <- pp_plot_data %>% t() %>% as.tibble()
   # number of datasets
@@ -116,6 +118,8 @@ pp_plot_v <- function(model, sample_number, y_name, lower = 0.3, upper = 0.3) {
   pp_plot_data <- posterior_predict(model)
   # in case I use brms multiple imputation, pp_plot_data has 3 dim
   n_dim <- pp_plot_data %>% dim() %>% length()
+  # brms substitues "_" by ""
+  y_name <- gsub("_", "", y_name)
   if (n_dim == 3) pp_plot_data <- pp_plot_data[, , y_name]
   pp_plot_data <- pp_plot_data %>% t() %>% as.tibble()
   # number of datasets
@@ -145,6 +149,8 @@ pp_plot_v2 <- function(model, sample_number, y_name, lower = 0.3, upper = 0.3) {
   pp_plot_data <- posterior_predict(model)
   # in case I use brms multiple imputation, pp_plot_data has 3 dim
   n_dim <- pp_plot_data %>% dim() %>% length()
+  # brms substitues "_" by ""
+  y_name <- gsub("_", "", y_name)
   if (n_dim == 3) pp_plot_data <- pp_plot_data[, , y_name]
   pp_plot_data <- pp_plot_data %>% t() %>% as.tibble()
   # number of datasets
