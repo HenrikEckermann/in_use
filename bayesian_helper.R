@@ -82,7 +82,11 @@ pp_plot <- function(model, sample_number, y_name, lower = 0.3, upper = 0.3) {
     max(model$data[, y_name]) + upper*max(model$data[, y_name])
   # pp_plot_data has 8000 simulated datasets. rows are invidiual 
   # subjects and columns the number of simulation
-  pp_plot_data <- posterior_predict(model) %>% t() %>% as.tibble()
+  pp_plot_data <- posterior_predict(model)
+  # in case I use brms multiple imputation, pp_plot_data has 3 dim
+  n_dim <- pp_plot_data %>% dim() %>% length()
+  if (n_dim == 3) pp_plot_data <- pp_plot_data[, , 1]
+  pp_plot_data <- pp_plot_data %>% t() %>% as.tibble()
   # number of datasets
   n <- dim(pp_plot_data)[2]
   pp_plot_data <- select(pp_plot_data, sample(1:n, sample_number, replace = F))
@@ -106,7 +110,11 @@ pp_plot_v <- function(model, sample_number, y_name, lower = 0.3, upper = 0.3) {
     max(model$data[, y_name]) + upper*max(model$data[, y_name])
   # pp_plot_data has 8000 simulated datasets. rows are invidiual 
   # subjects and columns the number of simulation
-  pp_plot_data <- posterior_predict(model) %>% t() %>% as.tibble()
+  pp_plot_data <- posterior_predict(model)
+  # in case I use brms multiple imputation, pp_plot_data has 3 dim
+  n_dim <- pp_plot_data %>% dim() %>% length()
+  if (n_dim == 3) pp_plot_data <- pp_plot_data[, , 1]
+  pp_plot_data <- pp_plot_data %>% t() %>% as.tibble()
   # number of datasets
   n <- dim(pp_plot_data)[2]
   pp_plot_data <- select(pp_plot_data, sample(1:n, sample_number, replace = F))
@@ -131,7 +139,11 @@ pp_plot_v2 <- function(model, sample_number, y_name, lower = 0.3, upper = 0.3) {
     max(model$data[, y_name]) + upper*max(model$data[, y_name])
   # pp_plot_data has 8000 simulated datasets. rows are invidiual 
   # subjects and columns the number of simulation
-  pp_plot_data <- posterior_predict(model) %>% t() %>% as.tibble()
+  pp_plot_data <- posterior_predict(model)
+  # in case I use brms multiple imputation, pp_plot_data has 3 dim
+  n_dim <- pp_plot_data %>% dim() %>% length()
+  if (n_dim == 3) pp_plot_data <- pp_plot_data[, , 1]
+  pp_plot_data <- pp_plot_data %>% t() %>% as.tibble()
   # number of datasets
   n <- dim(pp_plot_data)[2]
   pp_plot_data <- select(pp_plot_data, sample(1:n, sample_number, replace = F))
