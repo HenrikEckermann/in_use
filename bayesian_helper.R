@@ -172,7 +172,7 @@ pp_plot_v2 <- function(model, sample_number, y_name, lower = 0.3, upper = 0.3) {
         geom_jitter(data = model$data, aes_q(0, as.name(y_name), group = "none"), alpha = 0.5, width = 0.1) +
         ylim(c(lower, upper)) +
         coord_flip() +
-        ggtitle(as.character(plot_title)
+        ggtitle(plot_title)
 }
 
 
