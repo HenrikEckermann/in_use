@@ -20,6 +20,10 @@ report_star <- function(p) {
   return(ifelse(p < 0.001, '***', ifelse(p < 0.01, '**', ifelse(p < 0.05, '*', ' '))))
 }
 
+report_star_nondirectional <- function(p) {
+  return(ifelse(p < 0.001 | p > 0.999, '***', ifelse(p < 0.01 | p > 0.99, '**', ifelse(p < 0.05 | p > 0.95, '*', ' '))))
+}
+
 # same as above but for latex 
 report_star_latex <- function(value, p) {
   return(ifelse(p < 0.001, glue("$[value]^{***}$", .open = "[", .close = "]"), ifelse(p < 0.01, glue("$[value]^{**}$", .open = "[", .close = "]"), ifelse(p < 0.05, glue("$[value]^{*}$", .open = "[", .close = "]"), glue("${value}$")))))
