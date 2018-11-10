@@ -21,7 +21,7 @@ report_star <- function(p) {
 }
 
 report_star_nondirectional <- function(p) {
-  return(ifelse(p < 0.001 | p > 0.999, '***', ifelse(p < 0.01 | p > 0.99, '**', ifelse(p < 0.05 | p > 0.95, '*', ' '))))
+  return(ifelse(p < 0.0005 | p > 0.9995, '***', ifelse(p < 0.005 | p > 0.995, '**', ifelse(p < 0.025 | p > 0.975, '*', ' '))))
 }
 
 # same as above but for latex 
