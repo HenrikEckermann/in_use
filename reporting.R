@@ -29,6 +29,15 @@ report_star_latex <- function(value, p) {
   return(ifelse(p < 0.001, glue("$[value]^{***}$", .open = "[", .close = "]"), ifelse(p < 0.01, glue("$[value]^{**}$", .open = "[", .close = "]"), ifelse(p < 0.05, glue("$[value]^{*}$", .open = "[", .close = "]"), glue("${value}$")))))
 }
 
+report_f <- function(f, df1, df2, p, rsquare = 0) {
+  f <- round(f, 2)
+  rep_p <- report_p(p)
+  ifelse(rsquare ==0, 
+    glue("_F_({df1},{df2}) = {f}, {rep_p}"),
+    glue("$R^2$ = {rsquare}, _F_({df1},{df2}) = {f}, {rep_p}")
+  )
+  
+}
 
 
 #I use this function not for the analysis but only for reporting the estimates or test statistics.
