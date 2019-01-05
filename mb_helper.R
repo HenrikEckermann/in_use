@@ -102,14 +102,23 @@ biplot <- function(pseq_clr, scaling_factor = 10, color = NULL, text = FALSE, sp
         select(PC1, PC2, PC3, PC4, sample_id)
     data <- pseq_clr %>% 
                 sd_to_df() %>% 
-                left_join(princomps, by = "sample_id") 
-                       
-    # avoid errors due to wrong class
-    if (length(color) > 0) data[[color]] <-  as.factor(data[[color]])
-    if (connect_series != FALSE) data[[subject_id]] <-  as.factor(data[[subject_id]])
+                left_join(princomps, by = "sample_id")
     
     # apply filtering
     if (filter_samples != FALSE) data <- data %>% filter(sample_id %in% filter_samples)
+                       
+    # avoid errors due to wrong class
+    if (length(color) > 0) data[[color]] <-  as.factor(data[[color]])
+    
+    # if connecting by time, data must be arranged accordingly and also time/subject must be factor
+    if (connect_series != FALSE) { 
+        data[[subject_id]] <-  as.factor(data[[subject_id]])
+        data[[connect_series]] <-  as.factor(data[[connect_series]])
+        data <- data %>% arrange_(subject_id, connect_series)
+    } 
+ 
+    
+
                        
 
 
@@ -118,9 +127,6 @@ biplot <- function(pseq_clr, scaling_factor = 10, color = NULL, text = FALSE, sp
     pc2 <- round(pcx$sdev[2]^2/sum(pcx$sdev^2),3)
     pc3 <- round(pcx$sdev[3]^2/sum(pcx$sdev^2),3)
     pc4 <- round(pcx$sdev[4]^2/sum(pcx$sdev^2),3)
-
-    # if connecting by time, data must be arranged accordingly
-    if (connect_series != FALSE) data <- data %>% arrange_(connect_series)
                        
                        
     # define plottting function 
@@ -163,7 +169,7 @@ biplot <- function(pseq_clr, scaling_factor = 10, color = NULL, text = FALSE, sp
                     
     # path 
     if (connect_series != FALSE) {
-      pc_plots <- map(pc_plots, ~.x + geom_path(aes(group = subject_id), arrow = arrow(length = unit(0.35,"cm"), ends = "last"), alpha = 0.3, size = 0.8))
+      pc_plots <- map(pc_plots, ~.x + geom_path(aes_string(group = subject_id), arrow = arrow(length = unit(0.35,"cm"), ends = "last"), alpha = 0.3, size = 0.8))
                                       
                       
     } 
