@@ -80,16 +80,7 @@ df_to_otu <- function(otu, level = "species", taxa_are_rows = TRUE) {
 
 
 # biplot function 
-biplot <- function(
-  pseq_clr, 
-  scaling_factor = 10, 
-  color = NULL, 
-  text = FALSE, 
-  split_by = FALSE, 
-  facet = FALSE, 
-  connect_series = FALSE, 
-  subject_id = "subject_id", 
-  filter_samples = FALSE) {
+biplot <- function(pseq_clr, scaling_factor = 10, color = NULL, text = FALSE, split_by = FALSE, facet = FALSE, connect_series = FALSE, subject_id = "subject_id", filter_samples = FALSE) {
     
     
     # PCA
@@ -112,6 +103,10 @@ biplot <- function(
     data <- pseq_clr %>% 
                 sd_to_df() %>% 
                 left_join(princomps, by = "sample_id") 
+                       
+    # avoid errors due to wrong class
+    if (length(color) > 0) data[[color]] <-  as.factor(data[[color]])
+    if (connect_series != FALSE) data[[subject_id]] <-  as.factor(data[[subject_id]])
     
     # apply filtering
     if (filter_samples != FALSE) data <- data %>% filter(sample_id %in% filter_samples)
@@ -127,8 +122,6 @@ biplot <- function(
     # if connecting by time, data must be arranged accordingly
     if (connect_series != FALSE) data <- data %>% arrange_(connect_series)
                        
-    # avoid errors due to wrong class
-    if (length(color > 0)) data[[color]] <-  as.factor(data[[color]])
                        
     # define plottting function 
     create_plot <- function(data, pc = 1, pc1, pc2, title = "") {
@@ -166,9 +159,14 @@ biplot <- function(
     }else{
         pc_plots <- map(pc_plots, ~.x + geom_point())
     }
+
                     
     # path 
-    if (connect_series != FALSE) pc_plots <- map(pc_plots, ~.x + geom_path(aes(group = as.factor(subject_id)), arrow = arrow(length = unit(0.35,"cm"), ends = "last"), alpha = 0.3, size = 0.8))
+    if (connect_series != FALSE) {
+      pc_plots <- map(pc_plots, ~.x + geom_path(aes(group = subject_id), arrow = arrow(length = unit(0.35,"cm"), ends = "last"), alpha = 0.3, size = 0.8))
+                                      
+                      
+    } 
                        
     # facetting 
     if (facet != FALSE) pc_plots <- map(pc_plots, ~.x + facet_wrap(as.formula(glue(".~{facet}"))))  
