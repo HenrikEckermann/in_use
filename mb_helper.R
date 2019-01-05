@@ -79,8 +79,7 @@ df_to_otu <- function(otu, level = "species", taxa_are_rows = TRUE) {
 
 
 
-
-# function to create biplot, requires clr transformed pseq object as input: 
+# biplot function 
 biplot <- function(
   pseq_clr, 
   scaling_factor = 10, 
@@ -89,7 +88,8 @@ biplot <- function(
   split_by = FALSE, 
   facet = FALSE, 
   connect_series = FALSE, 
-  subject_id = "subject_id") {
+  subject_id = "subject_id", 
+  filter_samples = FALSE) {
     
     
     # PCA
@@ -112,6 +112,9 @@ biplot <- function(
     data <- pseq_clr %>% 
                 sd_to_df() %>% 
                 left_join(princomps, by = "sample_id") 
+    
+    # apply filtering
+    if (filter_samples != FALSE) data <- data %>% filter(sample_id %in% filter_samples)
                        
 
 
