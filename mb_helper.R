@@ -1,14 +1,10 @@
-# since I am used to dplyr for data manipulation I think it might be good to
-# have a fast way to to switch between dataframe/tibble to phyloseq so that 
-# I can use dplyr etc. also here. A requirement for phyloseq object creation is
-# that rownames are sample names that match the sample names in the otu table. 
-# Similarly, tax_table rownames need to match otu names of the otu table.
+# some helper function I use in my workflow
 
 library(phyloseq)
 library(dplyr)
 library(glue)
 
-# creates list of dfs
+# creates list of dfs from pseq object
 to_dfs <- function(pseq, level = "species", rtc_name = "sample_id") {
   # otu df
   otu <- as.data.frame(otu_table(pseq)) %>% rownames_to_column(level)
@@ -42,20 +38,21 @@ to_pseq <- function(
       return(pseq)
 }
 
-
+# creates df from pseq sample data
 sd_to_df <- function(pseq, rtc_name = "sample_id") {
     sample_data(pseq) %>%
     as_data_frame() %>%
     rownames_to_column(rtc_name)    
 }
 
+# adds or overwrites sample data of pseq object by df
 df_to_sd <- function(sdata, ctr_name = "sample_id") {
   sdata %>% 
     column_to_rownames(ctr_name) %>%
     sample_data()
 }
 
-
+# create df with otus from pseq
 otu_to_df <- function(pseq, level = "species", transpose = TRUE) {
     otu <- 
       otu_table(pseq) %>%
@@ -70,6 +67,7 @@ otu_to_df <- function(pseq, level = "species", transpose = TRUE) {
     otu
 }
 
+# add or edit otu table in pseq from df
 df_to_otu <- function(otu, level = "species", taxa_are_rows = TRUE) {
   otu %>% 
     column_to_rownames(level) %>%
@@ -80,7 +78,16 @@ df_to_otu <- function(otu, level = "species", taxa_are_rows = TRUE) {
 
 
 # biplot function 
-biplot <- function(pseq_clr, scaling_factor = 10, color = NULL, text = FALSE, split_by = FALSE, facet = FALSE, connect_series = FALSE, subject_id = "subject_id", filter_samples = FALSE) {
+biplot <- function(
+  pseq_clr, 
+  scaling_factor = 10, 
+  color = NULL, 
+  text = FALSE, 
+  split_by = FALSE, 
+  facet = FALSE, 
+  connect_series = FALSE, 
+  subject_id = "subject_id", 
+  filter_samples = FALSE) {
     
     
     # PCA
