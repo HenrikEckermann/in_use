@@ -152,7 +152,7 @@ biplot <- function(pseq_clr, scaling_factor = 10, color = NULL, text = FALSE, sp
     } else {
         # plots
         p12 <- create_plot(data = data, pc = 1, pc1, pc2)
-        p34 <- create_plot(data = data, pc = 2, pc3, pc4)
+        p34 <- create_plot(data = data, pc = 3, pc3, pc4)
         pc_plots <- list(p12, p34)  
     }
                        
