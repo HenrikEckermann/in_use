@@ -39,10 +39,11 @@ to_pseq <- function(
 }
 
 # creates df from pseq sample data
-sd_to_df <- function(pseq, rtc_name = "sample_id") {
+sd_to_df <- function(pseq) {
+    row_names <- rownames(sample_data(pseq))
     sample_data(pseq) %>%
-    as.data.frame() %>%
-    rownames_to_column(rtc_name)    
+    as_tibble() %>%
+    mutate(sample_id = row_names)
 }
 
 # adds or overwrites sample data of pseq object by df
