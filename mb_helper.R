@@ -41,7 +41,7 @@ to_pseq <- function(
 # creates df from pseq sample data
 sd_to_df <- function(pseq, rtc_name = "sample_id") {
     sample_data(pseq) %>%
-    as_data_frame() %>%
+    as.data.frame() %>%
     rownames_to_column(rtc_name)    
 }
 
