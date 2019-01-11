@@ -88,7 +88,8 @@ biplot <- function(
   facet = FALSE, 
   connect_series = FALSE, 
   subject_id = "subject_id", 
-  filter_samples = FALSE) {
+  filter_samples = FALSE,
+  otu_color = "#ef8a62") {
     
     
     # PCA
@@ -141,7 +142,7 @@ biplot <- function(
     create_plot <- function(data, pc = 1, pc1, pc2, title = "") {
         data %>%        
         ggplot(aes_string(glue("PC{pc}"), glue("PC{pc+1}"), label = "sample_id", color = color)) +
-            geom_text(data = pcx_rot, aes_string(glue("PC{pc}"), glue("PC{pc+1}"), label = "taxa"), color = "#999999", size = 3, alpha = 0.4) +
+            geom_text(data = pcx_rot, aes_string(glue("PC{pc}"), glue("PC{pc+1}"), label = "taxa"), color = otu_color, size = 3, alpha = 0.4) +
             xlab(glue("PC{pc}: [{pc1*100}%]")) +  ylab(glue("PC{pc+1}: [{pc2*100}%]")) +
             scale_y_continuous(sec.axis = ~./scaling_factor) +
             scale_x_continuous(sec.axis = ~./scaling_factor) +
