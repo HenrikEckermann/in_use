@@ -83,14 +83,20 @@ biplot <- function(
   pseq_clr, 
   scaling_factor = 10, 
   color = NULL,
-  shape = NULL, 
+  shape = NULL,
+  size = NULL, 
   text = FALSE, 
+  label = "sample_id",
+  alpha = 0.5,
   split_by = FALSE, 
   facet = FALSE, 
   connect_series = FALSE, 
   subject_id = "subject_id", 
   filter_samples = FALSE,
-  otu_color = "#ef8a62") {
+  otu_color = "#ef8a62",
+  textsize = 0.5,
+  textcolor = "black",
+  loading = FALSE) {
     
     
     # PCA
@@ -105,6 +111,11 @@ biplot <- function(
             as.tibble() %>%
             mutate_all(function(x) x * scaling_factor) %>%
             add_column(taxa = rownames(pcx$rotation))
+                       
+    if (loading != FALSE) {
+        loading <- loading * scaling_factor
+        pcx_rot <- pcx_rot %>% filter(abs(PC1) > loading | abs(PC2) > loading | abs(PC3) > loading | abs(PC4) > loading)
+        }
                        
     # combine first 4 PCs with metadata
     princomps <- pcx$x %>% as.data.frame() %>%
@@ -127,9 +138,6 @@ biplot <- function(
         data <- data %>% arrange_(subject_id, connect_series)
     } 
  
-    
-
-                       
 
 
     # how much variance do pcs explain?
@@ -142,8 +150,8 @@ biplot <- function(
     # define plottting function 
     create_plot <- function(data, pc = 1, pc1, pc2, title = "") {
         data %>%        
-        ggplot(aes_string(glue("PC{pc}"), glue("PC{pc+1}"), label = "sample_id", color = color)) +
-            geom_text(data = pcx_rot, aes_string(glue("PC{pc}"), glue("PC{pc+1}"), label = "taxa"), color = otu_color, size = 3, alpha = 0.4) +
+        ggplot(aes_string(glue("PC{pc}"), glue("PC{pc+1}"), label = label, color = color)) +
+            geom_text(data = pcx_rot, aes_string(glue("PC{pc}"), glue("PC{pc+1}"), label = "taxa"), color = otu_color, size = 3, alpha = alpha) +
             xlab(glue("PC{pc}: [{pc1*100}%]")) +  ylab(glue("PC{pc+1}: [{pc2*100}%]")) +
             scale_y_continuous(sec.axis = ~./scaling_factor) +
             scale_x_continuous(sec.axis = ~./scaling_factor) +
@@ -167,22 +175,24 @@ biplot <- function(
     }
                        
 
+    # path 
+    if (connect_series != FALSE) {
+      pc_plots <- map(pc_plots, ~.x + geom_path(aes_string(group = subject_id), arrow = arrow(length = unit(0.35,"cm"), ends = "last"), alpha = alpha, size = 0.8))
+                                      
+                      
+    }
+                       
                        
     # apply optionals 
     # text 
     if (text) {
-        pc_plots <- map(pc_plots, ~.x + geom_text(size = 3))
+        pc_plots <- map(pc_plots, ~.x + geom_text(size = textsize, color = textcolor))
     }else{
-        pc_plots <- map(pc_plots, ~.x + geom_point(aes_string(shape = shape)))
+        pc_plots <- map(pc_plots, ~.x + geom_point(aes_string(shape = shape, size = size)))
     }
 
                     
-    # path 
-    if (connect_series != FALSE) {
-      pc_plots <- map(pc_plots, ~.x + geom_path(aes_string(group = subject_id), arrow = arrow(length = unit(0.35,"cm"), ends = "last"), alpha = 0.3, size = 0.8))
-                                      
-                      
-    } 
+
                        
     # facetting 
     if (facet != FALSE) pc_plots <- map(pc_plots, ~.x + facet_wrap(as.formula(glue(".~{facet}"))))  
