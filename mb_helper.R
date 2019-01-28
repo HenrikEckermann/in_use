@@ -191,7 +191,7 @@ biplot <- function(
     if (text) {
         pc_plots <- map(pc_plots, ~.x + geom_text(size = textsize, color = textcolor))
     }else{
-        pc_plots <- map(pc_plots, ~.x + geom_point(aes_string(shape = shape), size = size))
+        pc_plots <- map(pc_plots, ~.x + geom_point(aes_string(shape = shape), size = size, alpha = alpha))
     }
 
                     
