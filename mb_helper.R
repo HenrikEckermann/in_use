@@ -95,7 +95,7 @@ biplot <- function(
   filter_samples = FALSE,
   otu_color = "#ef8a62",
   textsize = 1,
-  otu_text_size =1, 
+  otu_text_size = 1, 
   textcolor = "black",
   loading = FALSE) {
     
