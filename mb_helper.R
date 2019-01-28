@@ -96,6 +96,7 @@ biplot <- function(
   otu_color = "#ef8a62",
   textsize = 1,
   otu_text_size = 1, 
+  otu_alpha = 1, 
   textcolor = "black",
   loading = FALSE,
   path_size = 1, 
@@ -154,7 +155,7 @@ biplot <- function(
     create_plot <- function(data, pc = 1, pc1, pc2, title = "") {
         data %>%        
         ggplot(aes_string(glue("PC{pc}"), glue("PC{pc+1}"), label = label, color = color)) +
-            geom_text(data = pcx_rot, aes_string(glue("PC{pc}"), glue("PC{pc+1}"), label = "taxa"), color = otu_color, size = otu_text_size, alpha = alpha) +
+            geom_text(data = pcx_rot, aes_string(glue("PC{pc}"), glue("PC{pc+1}"), label = "taxa"), color = otu_color, size = otu_text_size, alpha = otu_alpha) +
             xlab(glue("PC{pc}: [{pc1*100}%]")) +  ylab(glue("PC{pc+1}: [{pc2*100}%]")) +
             scale_y_continuous(sec.axis = ~./scaling_factor) +
             scale_x_continuous(sec.axis = ~./scaling_factor) +
