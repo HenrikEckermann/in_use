@@ -100,7 +100,9 @@ biplot <- function(
   textcolor = "black",
   loading = FALSE,
   path_size = 1, 
-  arrow_size = 0.35) {
+  arrow_size = 0.35,
+  colors = c("#fc8d62", "#8da0cb", "#66c2a5",'#1f78b4','#33a02c','#e31a1c')
+) {
     
     
     # PCA
@@ -159,7 +161,7 @@ biplot <- function(
             xlab(glue("PC{pc}: [{pc1*100}%]")) +  ylab(glue("PC{pc+1}: [{pc2*100}%]")) +
             scale_y_continuous(sec.axis = ~./scaling_factor) +
             scale_x_continuous(sec.axis = ~./scaling_factor) +
-            scale_color_manual(values = c("#fc8d62", "#8da0cb", "#66c2a5",'#1f78b4','#33a02c','#e31a1c')) +
+            scale_color_manual(values = c(colors)) +
             ggtitle(title) +
             theme_bw()  
     }
