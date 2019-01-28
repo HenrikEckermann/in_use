@@ -100,6 +100,7 @@ biplot <- function(
   textcolor = "black",
   loading = FALSE,
   path_size = 1, 
+  path_alpha = 0.5,
   arrow_size = 0.35,
   colors = c("#fc8d62", "#8da0cb", "#66c2a5",'#1f78b4','#33a02c','#e31a1c')
 ) {
@@ -183,7 +184,7 @@ biplot <- function(
 
     # path 
     if (connect_series != FALSE) {
-      pc_plots <- map(pc_plots, ~.x + geom_path(aes_string(group = subject_id), arrow = arrow(length = unit(arrow_size,"cm"), ends = "last"), alpha = alpha, size = path_size))
+      pc_plots <- map(pc_plots, ~.x + geom_path(aes_string(group = subject_id), arrow = arrow(length = unit(arrow_size,"cm"), ends = "last"), alpha = path_alpha, size = path_size))
                                       
                       
     }
