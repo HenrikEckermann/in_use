@@ -180,7 +180,7 @@ biplot <- function(
 
     # path 
     if (connect_series != FALSE) {
-      pc_plots <- map(pc_plots, ~.x + geom_path(aes_string(group = subject_id), arrow = arrow(length = unit(0.35,"cm"), ends = "last"), alpha = alpha, size = path_size))
+      pc_plots <- map(pc_plots, ~.x + geom_path(aes_string(group = subject_id), arrow = arrow(length = unit(arrow_size,"cm"), ends = "last"), alpha = alpha, size = path_size))
                                       
                       
     }
