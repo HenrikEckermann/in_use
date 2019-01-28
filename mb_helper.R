@@ -99,8 +99,7 @@ biplot <- function(
   textcolor = "black",
   loading = FALSE,
   path_size = 1, 
-  arrow_size = 0.35, 
-  otu_alpha = 0.4) {
+  arrow_size = 0.35) {
     
     
     # PCA
@@ -155,6 +154,7 @@ biplot <- function(
     create_plot <- function(data, pc = 1, pc1, pc2, title = "") {
         data %>%        
         ggplot(aes_string(glue("PC{pc}"), glue("PC{pc+1}"), label = label, color = color)) +
+            geom_text(data = pcx_rot, aes_string(glue("PC{pc}"), glue("PC{pc+1}"), label = "taxa"), color = otu_color, size = otu_text_size, alpha = alpha) +
             xlab(glue("PC{pc}: [{pc1*100}%]")) +  ylab(glue("PC{pc+1}: [{pc2*100}%]")) +
             scale_y_continuous(sec.axis = ~./scaling_factor) +
             scale_x_continuous(sec.axis = ~./scaling_factor) +
@@ -200,5 +200,5 @@ biplot <- function(
     # facetting 
     if (facet != FALSE) pc_plots <- map(pc_plots, ~.x + facet_wrap(as.formula(glue(".~{facet}"))))  
                        
-    pc_plots + geom_text(data = pcx_rot, aes_string(glue("PC{pc}"), glue("PC{pc+1}"), label = "taxa"), color = otu_color, size = otu_text_size, alpha = otu_alpha)
+    pc_plots
 }
