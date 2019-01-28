@@ -97,7 +97,10 @@ biplot <- function(
   textsize = 1,
   otu_text_size = 1, 
   textcolor = "black",
-  loading = FALSE) {
+  loading = FALSE,
+  path_size = 1, 
+  arrow_size = 0.35
+) {
     
     
     # PCA
@@ -178,7 +181,7 @@ biplot <- function(
 
     # path 
     if (connect_series != FALSE) {
-      pc_plots <- map(pc_plots, ~.x + geom_path(aes_string(group = subject_id), arrow = arrow(length = unit(0.35,"cm"), ends = "last"), alpha = alpha, size = 0.8))
+      pc_plots <- map(pc_plots, ~.x + geom_path(aes_string(group = subject_id), arrow = arrow(length = unit(0.35,"cm"), ends = "last"), alpha = alpha, size = path_size))
                                       
                       
     }
