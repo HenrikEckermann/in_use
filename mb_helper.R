@@ -99,8 +99,7 @@ biplot <- function(
   textcolor = "black",
   loading = FALSE,
   path_size = 1, 
-  arrow_size = 0.35
-) {
+  arrow_size = 0.35) {
     
     
     # PCA
