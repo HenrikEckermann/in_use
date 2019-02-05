@@ -87,15 +87,15 @@ biplot <- function(
   size = NULL, 
   text = FALSE, 
   label = "sample_id",
-  alpha = 0.5,
+  alpha = 1,
   split_by = FALSE, 
   facet = FALSE, 
   connect_series = FALSE, 
   subject_id = "subject_id", 
   filter_samples = FALSE,
   otu_color = "#ef8a62",
-  textsize = 1,
-  otu_text_size = 1, 
+  textsize = 3,
+  otu_text_size = 3, 
   otu_alpha = 1, 
   textcolor = "black",
   loading = FALSE,
@@ -195,7 +195,7 @@ biplot <- function(
     if (text) {
         pc_plots <- map(pc_plots, ~.x + geom_text(size = textsize, color = textcolor))
     }else{
-        pc_plots <- map(pc_plots, ~.x + geom_point(aes_string(shape = shape), size = size, alpha = alpha))
+        pc_plots <- map(pc_plots, ~.x + geom_point(aes_string(shape = shape, size = size), alpha = alpha))
     }
 
                     
