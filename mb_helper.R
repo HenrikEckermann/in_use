@@ -93,7 +93,7 @@ biplot <- function(
   connect_series = FALSE, 
   subject_id = "subject_id", 
   filter_samples = FALSE,
-  otu_color = "#ef8a62",
+  otu_color = "#404040",
   textsize = 3,
   otu_text_size = 3, 
   otu_alpha = 1, 
