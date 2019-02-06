@@ -84,7 +84,6 @@ biplot <- function(
   scaling_factor = 10, 
   color = NULL,
   shape = NULL,
-  size = NULL, 
   text = FALSE, 
   label = "sample_id",
   alpha = 1,
@@ -94,7 +93,8 @@ biplot <- function(
   subject_id = "subject_id", 
   filter_samples = FALSE,
   otu_color = "#404040",
-  textsize = 3,
+  text_size = 3,
+  point_size = 3,
   otu_text_size = 3, 
   otu_alpha = 1, 
   textcolor = "black",
@@ -102,8 +102,8 @@ biplot <- function(
   path_size = 1, 
   path_alpha = 0.5,
   arrow_size = 0.35,
-  colors = c("#fc8d62", "#8da0cb", "#66c2a5",'#1f78b4','#33a02c','#e31a1c')
-) {
+  colors = c("#fc8d62", "#8da0cb", "#66c2a5",'#1f78b4','#33a02c','#e31a1c'),
+  gradient = FALSE) {
     
     
     # PCA
@@ -136,7 +136,9 @@ biplot <- function(
     if (filter_samples != FALSE) data <- data %>% filter(sample_id %in% filter_samples)
                        
     # avoid errors due to wrong class
-    if (length(color) > 0) data[[color]] <-  as.factor(data[[color]])
+    if (length(color) > 0 & !gradient) {
+      data[[color]] <-  as.factor(data[[color]])
+    }
     
     # if connecting by time, data must be arranged accordingly and also time/subject must be factor
     if (connect_series != FALSE) { 
@@ -162,7 +164,6 @@ biplot <- function(
             xlab(glue("PC{pc}: [{pc1*100}%]")) +  ylab(glue("PC{pc+1}: [{pc2*100}%]")) +
             scale_y_continuous(sec.axis = ~./scaling_factor) +
             scale_x_continuous(sec.axis = ~./scaling_factor) +
-            scale_color_manual(values = c(colors)) +
             ggtitle(title) +
             theme_bw()  
     }
@@ -193,12 +194,17 @@ biplot <- function(
     # apply optionals 
     # text 
     if (text) {
-        pc_plots <- map(pc_plots, ~.x + geom_text(size = textsize, color = textcolor))
+        pc_plots <- map(pc_plots, ~.x + geom_text(size = text_size, color = textcolor))
     }else{
-        pc_plots <- map(pc_plots, ~.x + geom_point(aes_string(shape = shape, size = size), alpha = alpha))
+        pc_plots <- map(pc_plots, ~.x + geom_point(aes_string(shape = shape), alpha = alpha, size = point_size))
     }
 
-                    
+    # apply color for factors
+    if (length(color) > 0 & !gradient) {
+      pc_plots <- map(pc_plots, ~.x + scale_color_manual(values = c(colors)))
+    }
+    
+           
 
                        
     # facetting 
