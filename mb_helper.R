@@ -212,29 +212,3 @@ biplot <- function(
                        
     pc_plots
 }
-# change group names for plotting
-data <- data %>% mutate(
-    group = ifelse(groups == "noCCpost", "noccpost", ifelse(groups == "CCpost", "ccpost", ifelse(groups == "CCpre", "ccpre", "noccpre"))))
-# visualize difference
-plot_effects <- function(div, df_div, data = data) {
-    title = gsub("_", " ", div)
-    title = str_to_title(title)
-    #df_div_gathered <- df_div %>% gather(group, value)
-    df_div_gathered <- df_div %>% 
-        select(-sigma) %>%
-        gather(group, value) %>%
-        group_by(group) %>%
-        summarise(mean = mean(value), lower = hpdi(value)[1], upper = hpdi(value)[2])
-    data %>% mutate(subject_id = as.factor(subject_id)) %>%
-    ggplot(aes_string("group", div, group = "subject_id")) +
-        geom_point(alpha = 0.5, size = 3) +
-        geom_path(alpha = 0.3, size = 1) +
-        geom_errorbar(data = df_div_gathered, aes(x = group, y = mean, ymin = lower, ymax = upper, group = ""), color = "#ca0020", size = 2) +
-        #geom_jitter(data = df_div_gathered, aes(x = group, y = value, group = ""), width = 0.05, alpha = 0.01, color = "#ef8a62") +
-        scale_x_discrete(limits=c("noccpre", "noccpost", "ccpre", "ccpost"), labels = c("HOME PRE", "HOME POST", "CC PRE", "CC POST")) +
-        ylab(title) + xlab("") +
-        theme_bw()
-}
-
-p_shannon <- plot_effects("shannon", df_shannon, data = data)
-p_shannon
