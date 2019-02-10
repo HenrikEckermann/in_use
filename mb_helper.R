@@ -4,6 +4,16 @@ library(phyloseq)
 library(dplyr)
 library(glue)
 
+
+# define function to clean hitchip otu names
+clean_otu_names <- function(species) {
+        species <- gsub(".*sensu stricto.*", "Clostridiumsensustricto", species)
+        species <- gsub("_", "", species)
+        species <- gsub("\\.", "", species)
+        species <- gsub(" ", "", species) 
+    species
+}
+
 # creates list of dfs from pseq object
 to_dfs <- function(pseq, level = "species", rtc_name = "sample_id") {
   # otu df
@@ -212,3 +222,4 @@ biplot <- function(
                        
     pc_plots
 }
+
