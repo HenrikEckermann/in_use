@@ -215,7 +215,7 @@ true_diff <- function(model, true_values) {
     b0 = b_Intercept,  
     sigma_0 = exp(b_sigma_Intercept),
     b1 = b_group1, 
-    sigma_1 = exp((b_sigma_Intercept + b_sigma_group1))) %>%
+    sigma_1 = exp((b_sigma_Intercept + b_sigma_group1))) %>% # The sigmas were implicitly modeled through a log-link (because they must be positive).
     select(b0, sigma_0, b1, sigma_1) %>%
     gather(term, value) %>%
     group_by(term) %>%
@@ -225,3 +225,25 @@ true_diff <- function(model, true_values) {
     mutate(diff = true_values - estimate)
 }
 
+
+# works with brms fits 
+# model screening/excluding 
+return_diag <- function(fit, genus) {
+    sum_fit <- summary(fit)
+    params <- rbind(sum_fit$fixed, sum_fit$random$subject_id, sum_fit$spec_pars) %>% as.data.frame()
+    # extract n of divergent transitions
+    n_divergent <- nuts_params(fit) %>% 
+        filter(Parameter == "divergent__") %>% 
+        summarise(n = sum(Value))
+    # extract n of rhat > 1.1        
+    n_high_rhat <- dim(filter(params, Rhat >= 1.1))[1]
+    # check if there are rhat > 1.1 or divergent transitions
+    if (n_high_rhat > 0) {
+        message(glue("{genus} has {n_high_rhat} high Rhat parameter values"))
+        return(FALSE)
+    } else if (n_divergent$n > 0){
+        message(glue("{genus} has {n_divergent$n} divergent transitions"))
+        return(FALSE)
+    } 
+    TRUE
+}
