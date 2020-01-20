@@ -13,6 +13,7 @@ clean_otu_names <- function(species) {
         species <- gsub(" ", "", species) 
         species <- gsub("\\[", "", species)
         species <- gsub("\\]", "", species)
+        species <- gsub("-", "", species)
     species
 }
 
