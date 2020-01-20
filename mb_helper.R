@@ -11,6 +11,8 @@ clean_otu_names <- function(species) {
         species <- gsub("_", "", species)
         species <- gsub("\\.", "", species)
         species <- gsub(" ", "", species) 
+        species <- gsub("[", "", species)
+        species <- gsub("]", "", species)
     species
 }
 
@@ -128,7 +130,8 @@ biplot <- function(
             as.tibble() %>%
             mutate_all(function(x) x * scaling_factor) %>%
             add_column(taxa = rownames(pcx$rotation))
-                       
+    
+    # only show taxa that have a loading above a specified treshold               
     if (loading != FALSE) {
         loading <- loading * scaling_factor
         pcx_rot <- pcx_rot %>% filter(abs(PC1) > loading | abs(PC2) > loading | abs(PC3) > loading | abs(PC4) > loading)
