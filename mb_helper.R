@@ -11,8 +11,8 @@ clean_otu_names <- function(species) {
         species <- gsub("_", "", species)
         species <- gsub("\\.", "", species)
         species <- gsub(" ", "", species) 
-        species <- gsub("[", "", species)
-        species <- gsub("]", "", species)
+        species <- gsub("\[", "", species)
+        species <- gsub("\]", "", species)
     species
 }
 
