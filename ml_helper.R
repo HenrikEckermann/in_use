@@ -1,5 +1,6 @@
 library(randomForest)
 library(tidyverse)
+source("https://raw.githubusercontent.com/HenrikEckermann/in_use/master/reporting.R")
 
 
 
@@ -71,3 +72,59 @@ rf_cor <- function(
       summarise(mean = mean(value), sd = sd(value))
     list("p" = p, "rsq" = rsq)
   }
+
+
+
+#########################
+### Model diagnostics ### --------------------------------------
+#########################
+
+lm_diag <- function(model, data, Y) {
+  diag_df <- data %>%
+  mutate( 
+    sresid = resid(model), 
+    fitted = fitted(model)
+  ) %>% 
+  mutate(sresid = scale(sresid)[, 1])
+  
+
+  # distribution of the scaled residuals
+  p_resid <- ggplot(diag_df, aes(sresid)) +
+      geom_density() +
+      ylab('Density') + xlab('Standardized Redsiduals') +
+      theme_minimal()
+
+  ## qq plot (source code for gg_qq in script)
+  qq <- 
+    gg_qq(diag_df$sresid)+ 
+    theme_minimal() + 
+    xlab('Theoretical') + ylab('Sample')
+
+  # fitted vs sresid 
+  fit_resid <- 
+    ggplot(diag_df, aes(fitted, sresid)) +
+      geom_point(alpha = 0.6) +
+      geom_smooth(se = F, color = "#f94c39") +
+      geom_point(
+        data = filter(diag_df, abs(sresid) > 3.5), 
+        aes(fitted, sresid), color='red'
+      ) +
+      ggrepel::geom_text_repel(
+        data = filter(diag_df, abs(sresid) > 3.5), 
+        aes(fitted, y = sresid, label = id), size = 3
+      ) +
+      ylab('Standardized Residuals') + xlab('Fitted Values') +
+      scale_y_continuous(breaks=c(-4, -3, -2, -1, 0, 1, 2, 3, 4))+
+      theme_minimal()
+
+  # Fitted vs observed
+  fit_obs <- 
+    ggplot(diag_df, aes_string("fitted", glue("{Y}"))) +
+      geom_point(alpha = 0.6) +
+      geom_smooth(se = F, color = '#f94c39') +
+      ylab(glue("Observed {Y}")) + xlab('Fitted Values') +
+      theme_minimal()
+      
+  (p_resid + qq) /
+    (fit_resid + fit_obs)
+}
