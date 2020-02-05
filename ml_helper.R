@@ -55,14 +55,15 @@ rf_model_fit <- function(models_and_data, outcome, regression = TRUE) {
   p
 }
 
-rf_cor <- function(
+rf_summary <- function(
   data, 
   predictors,
   outcome,
   p = 0.8, 
   times = 10, 
   id_name = "id",
-  ntree = 5000) {
+  ntree = 5000,
+  regression = TRUE) {
     model_and_data <- rf_cv(
       data,
       predictors,
@@ -71,18 +72,30 @@ rf_cor <- function(
       times = times, 
       id_name = id_name,
       ntree = ntree)
-    p <- rf_model_fit(model_and_data, outcome = outcome)
-    p <- map_dfr(p, function(list) {
-      list[[1]]
-     }) %>% gather(sample, value) %>%
-      summarise(mean = mean(value), sd = sd(value))
+    metric <- rf_model_fit(model_and_data, outcome = outcome)
+    if (regression) {
+      p <- map_dfr(metric, function(list) {
+        list[[1]]
+       }) %>% gather(sample, value) %>%
+        summarise(mean = mean(value), sd = sd(value))
+        
+      rsq <- map_dfr(metric, function(list) {
+        list[[2]]
+       }) %>% gather(sample, value) %>%
+        summarise(mean = mean(value), sd = sd(value))
+        
+      list("p" = p, "rsq" = rsq)
       
-    rsq <- rf_model_fit(model_and_data, outcome = outcome)
-    rsq <- map_dfr(rsq, function(list) {
-      list[[2]]
-     }) %>% gather(sample, value) %>%
-      summarise(mean = mean(value), sd = sd(value))
-    list("p" = p, "rsq" = rsq)
+    } else {
+      bind_rows(
+        map_dfr(metric, ~bind_rows(.x)) %>% summarise_all(median),
+        map_dfr(metric, ~bind_rows(.x)) %>% summarise_all(sd)
+      ) %>%
+      mutate(statistic = c("median", "sd")) %>%
+      select(statistic, everything()) %>%
+      mutate_if(is.numeric, round, 3)
+    }
+    
   }
 
 
