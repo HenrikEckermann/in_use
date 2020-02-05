@@ -9,8 +9,7 @@ rf_cv <- function(
   predictors,
   outcome,
   p = 0.8, 
-  times = 10, 
-  id_name = "id",
+  times = 10,
   ntree = 5000
   ) {
     train_indeces <- caret::createDataPartition(
@@ -60,8 +59,7 @@ rf_summary <- function(
   predictors,
   outcome,
   p = 0.8, 
-  times = 10, 
-  id_name = "id",
+  times = 10,
   ntree = 5000,
   regression = TRUE) {
     model_and_data <- rf_cv(
@@ -69,8 +67,7 @@ rf_summary <- function(
       predictors,
       outcome,
       p = p, 
-      times = times, 
-      id_name = id_name,
+      times = times,
       ntree = ntree)
     metric <- rf_model_fit(model_and_data, outcome = outcome, regression = regression)
     if (regression) {
