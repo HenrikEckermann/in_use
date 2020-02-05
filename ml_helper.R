@@ -45,7 +45,9 @@ rf_model_fit <- function(models_and_data, outcome, regression = TRUE) {
       pred_prob <- predict(model, test, type = "prob")
       log_l <- MLmetrics::LogLoss(pred_prob[, 2], as.numeric(test$group) - 1)
       oob <- model$err.rate %>% as_tibble() %>% summarise_all(median)
-      list(log_l, oob)
+      metric <- oob %>% mutate(log_l = log_l) %>%
+        select(log_l, oob_avg = OOB, "0", "1")
+      list(metric)
     }
 
     
