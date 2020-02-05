@@ -95,7 +95,6 @@ rf_summary <- function(
       select(statistic, everything()) %>%
       mutate_if(is.numeric, round, 3)
     }
-    
   }
 
 
