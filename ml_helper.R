@@ -72,7 +72,7 @@ rf_summary <- function(
       times = times, 
       id_name = id_name,
       ntree = ntree)
-    metric <- rf_model_fit(model_and_data, outcome = outcome)
+    metric <- rf_model_fit(model_and_data, outcome = outcome, regression = regression)
     if (regression) {
       p <- map_dfr(metric, function(list) {
         list[[1]]
