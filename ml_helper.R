@@ -14,7 +14,7 @@ rf_cv <- function(
   ntree = 5000
   ) {
     train_indeces <- caret::createDataPartition(
-      data[[id_name]], 
+      data[[outcome]], 
       p = p, 
       times = times)
     map(train_indeces, function(ind) {
@@ -30,15 +30,23 @@ rf_cv <- function(
       })
     }
 
-rf_model_fit <- function(models_and_data, outcome) {
+rf_model_fit <- function(models_and_data, outcome, regression = TRUE) {
   p <- map(models_and_data, function(model_and_data) {
+    
     model <- model_and_data[[1]]
     test <- model_and_data[[2]]
-    preds <- predict(model, test)
-    p <- cor.test(test[[outcome]], preds)
-    p <- round(p[4]$estimate, 3)
-    rsq <- mean(model$rsq) %>% round(3)
-    list(p, rsq)
+    if (regression) {
+      preds <- predict(model, test)
+      p <- cor.test(test[[outcome]], preds)
+      p <- round(p[4]$estimate, 3)
+      rsq <- mean(model$rsq) %>% round(3)
+      list(p, rsq)
+    } else {
+      pred_prob <- predict(model, test, type = "prob")
+      log_l <- MLmetrics::LogLoss(pred_prob[, 2], as.numeric(test$group) - 1)
+    }
+
+    
   })
   p
 }
