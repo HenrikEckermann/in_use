@@ -87,12 +87,16 @@ rf_summary <- function(
       list("p" = p, "rsq" = rsq)
       
     } else {
-      bind_rows(
-        map_dfr(metric, ~bind_rows(.x)) %>% summarise_all(median),
-        map_dfr(metric, ~bind_rows(.x)) %>% summarise_all(sd)
+      map_dfr(metric, ~bind_rows(.x)) %>%
+      select(oob_class_0 = "0", oob_class_1 = "1", everything()) %>%
+      gather(statistic, value) %>% 
+      group_by(statistic) %>%
+      summarise(
+        median = median(value), 
+        sd = sd(value), 
+        lower = quantile(value, 0.025), 
+        upper = quantile(value, 0.975)
       ) %>%
-      mutate(statistic = c("median", "sd")) %>%
-      select(statistic, everything()) %>%
       mutate_if(is.numeric, round, 3)
     }
   }
