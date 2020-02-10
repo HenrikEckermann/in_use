@@ -2,6 +2,9 @@ library(randomForest)
 library(tidyverse)
 source("https://raw.githubusercontent.com/HenrikEckermann/in_use/master/reporting.R")
 
+#########################
+### Random Forests ### --------------------------------------
+#########################
 
 
 rf_cv <- function(
@@ -97,6 +100,23 @@ rf_summary <- function(
       mutate_if(is.numeric, round, 3)
     }
   }
+  
+plot_importance <- function(model, regression = T) {
+  if (regression) {
+    var_imp <- importance(model, type = 1)
+    var_imp <- var_imp %>% as.data.frame() %>%
+    rownames_to_column("variable") %>%
+    select(variable, inc_mse = `%IncMSE`) %>%
+    arrange(inc_mse) %>%
+    mutate(variable = factor(variable, level = variable))
+    ggplot(var_imp, aes(variable, inc_mse)) +
+      geom_col() +
+      coord_flip() 
+  } else {
+    print("Please program this function for classification")  }
+}
+
+
 
 
 
