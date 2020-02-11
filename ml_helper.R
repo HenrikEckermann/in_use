@@ -3,7 +3,7 @@ library(tidyverse)
 source("https://raw.githubusercontent.com/HenrikEckermann/in_use/master/reporting.R")
 
 #########################
-### Random Forests ### --------------------------------------
+###   Random Forests  ### --------------------------------------
 #########################
 
 
@@ -121,9 +121,75 @@ plot_importance <- function(model, regression = T) {
 
 
 #########################
-### Model diagnostics ### --------------------------------------
+###    Regression     ### --------------------------------------
 #########################
 
+# to plot simple regression or counterfactual plots 
+# model is brms model (might work with other lm models too)
+# specify x2 for counterfactual plots
+plot_regression <- function(
+  model, x, y, 
+  points = TRUE, 
+  counterfactual = FALSE, 
+  x2 = NULL) {
+    
+    
+    n <- length(model$data[[x2]])
+    if (counterfactual) {
+      newdata <- tibble(
+        x_rep = seq(
+          from = min(model$data[[x]]), 
+          to = max(model$data[[x]]), 
+          length.out = n),
+        x2_rep = mean(model$data[[x2]])
+      )
+      colnames(newdata) <- c(x, x2)
+    } else {
+      newdata <- tibble(
+        x_rep = seq(
+          from = min(model$data[[x]]), 
+          to = max(model$data[[x]]), 
+          length.out = n)
+        )
+      colnames(newdata) <- c(x)
+    }
+
+    df <- fitted(model, newdata = newdata) %>% 
+      as_tibble() %>%  
+      rename(
+        f_ll = Q2.5,
+        f_ul = Q97.5
+    ) 
+    pred <- predict(model, newdata) %>% 
+             as_tibble() %>%
+             transmute(p_ll = Q2.5, p_ul = Q97.5)
+    df <- bind_cols(newdata, pred, df)
+      
+    if(!counterfactual) {
+      p <- ggplot(df, aes_string(x, "Estimate")) +
+          geom_smooth(aes(ymin = f_ll, ymax = f_ul), stat = "identity")
+          
+    } else if(counterfactual) {
+
+        p <- ggplot(df, aes_string(x = x, y = "Estimate")) +
+              geom_ribbon(aes(ymin = p_ll, ymax = p_ul), alpha = 1/5) +
+              geom_smooth(aes(ymin = f_ll, ymax = f_ul), stat = "identity") +
+              coord_cartesian(xlim = range(model$data[[x]]))
+    }
+    
+    # add real data points
+    if(points) {
+      p <- p + geom_point(data = model$data, aes_string(x, y))
+    }
+    
+    return(p)
+}
+
+
+
+
+
+# diagnostic plots for frequentist regression (lm or lme4)
 lm_diag <- function(model, data, Y) {
   diag_df <- data %>%
   mutate( 
