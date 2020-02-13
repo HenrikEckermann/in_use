@@ -122,11 +122,11 @@ plot_importance <- function(model, regression = T, top_n = NULL) {
 extract_importance <- function(model, n = 10) {
       var_imp <- importance(model, type = 1)
       var_imp <- var_imp %>% as.data.frame() %>%
-      rownames_to_column("variable") %>%
-      select(variable, inc_mse = `%IncMSE`) %>%
-      arrange(inc_mse) %>%
-      mutate(variable = factor(variable, level = variable)) %>%
-      tail(n)
+        rownames_to_column("variable") %>%
+        select(variable, inc_mse = `%IncMSE`) %>%
+        arrange(inc_mse) %>%
+        mutate(variable = factor(variable, level = variable)) %>%
+        tail(n)
       return(var_imp)  
 }
 
