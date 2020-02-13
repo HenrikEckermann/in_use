@@ -101,17 +101,21 @@ rf_summary <- function(
     }
   }
   
-plot_importance <- function(model, regression = T) {
+plot_importance <- function(model, regression = T, top_n = NULL) {
   if (regression) {
     var_imp <- importance(model, type = 1)
     var_imp <- var_imp %>% as.data.frame() %>%
     rownames_to_column("variable") %>%
     select(variable, inc_mse = `%IncMSE`) %>%
-    arrange(inc_mse) %>%
-    mutate(variable = factor(variable, level = variable))
-    ggplot(var_imp, aes(variable, inc_mse)) +
-      geom_col() +
-      coord_flip() 
+    arrange(inc_mse)
+    if (!is.null(top_n)) {
+      var_imp <- head(var_imp, top_n)
+    }
+    var_imp < - var_imp %>% 
+      mutate(variable = factor(variable, level = variable))
+      ggplot(var_imp, aes(variable, inc_mse)) +
+        geom_col() +
+        coord_flip() 
   } else {
     print("Please program this function for classification")  }
 }
@@ -184,8 +188,6 @@ plot_regression <- function(
     
     return(p)
 }
-
-
 
 
 
