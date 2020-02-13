@@ -127,7 +127,7 @@ extract_importance <- function(model, n = 10) {
       arrange(inc_mse) %>%
       mutate(variable = factor(variable, level = variable)) %>%
       tail(n)
-  
+      return(var_imp)  
 }
 
 
