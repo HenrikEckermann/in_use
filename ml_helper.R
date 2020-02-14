@@ -2,6 +2,54 @@ library(randomForest)
 library(tidyverse)
 source("https://raw.githubusercontent.com/HenrikEckermann/in_use/master/reporting.R")
 
+
+
+#########################
+###     ML General    ### --------------------------------------
+#########################
+
+
+model_eval <- function(
+  model, 
+  testdata, 
+  features,
+  y,  
+  model_type = "default", 
+  classification = TRUE) {
+    
+    if (classification) {
+      
+      # what wee need for all classfication models
+      y_true <- as.numeric(testdata[[y]]) -1
+      
+      # for most models we can get predictions like this
+      if (model_type == "default") {
+        y_pred_resp <- predict(model, testdata, type = "response")
+        y_pred_resp <- as.numeric(y_pred_resp) -1
+        y_pred_prob <- predict(model, testdata, type = "prob")
+        
+      # for xgb models we need a xgb.DMatrix
+      } else if (model_type == "xgb") {
+        testdata_xgb <- select(testdata, features) %>% as.matrix()
+        testdata_xgb <- xgb.DMatrix(data = testdata_xgb, label = y_true)
+        y_pred_prob <- predict(model, testdata_xgb)
+        y_pred_resp <- ifelse(y_pred_prob == 0.5, 
+          rbinom(n = 1, size = 1, p = 0.5), ifelse(y_pred_prob > 0.5,
+            1, 0))
+      }
+      # logloss 
+      log_l <- MLmetrics::LogLoss(y_pred, y_true)
+      # F1 scores
+      f_one <- MLmetrics::F1_Score(y_true, y_pred_resp)
+    }
+  return(list("logloss" = log_l, "F1" = f_one))
+}
+
+
+
+
+
+
 #########################
 ###   Random Forests  ### --------------------------------------
 #########################
@@ -129,6 +177,7 @@ extract_importance <- function(model, n = 10) {
         tail(n)
       return(var_imp)  
 }
+
 
 
 
