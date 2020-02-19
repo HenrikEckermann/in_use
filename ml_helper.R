@@ -1,6 +1,5 @@
-library(randomForest)
+
 library(tidyverse)
-source("https://raw.githubusercontent.com/HenrikEckermann/in_use/master/reporting.R")
 
 
 
@@ -8,28 +7,28 @@ source("https://raw.githubusercontent.com/HenrikEckermann/in_use/master/reportin
 ###     ML General    ### --------------------------------------
 #########################
 
-
+# returns df of our eval metrics (logloss and F1)
 model_eval <- function(
   model, 
   testdata, 
   features,
   y,  
-  model_type = "default", 
+  model_type = "randomForest", 
   classification = TRUE) {
     
     if (classification) {
       
-      # what wee need for all classfication models
+      # what we need for all classfication models
       y_true <- as.numeric(testdata[[y]]) -1
       
       # for most models we can get predictions like this
-      if (model_type == "default") {
+      if (model_type == "randomForest") {
         y_pred_resp <- predict(model, testdata, type = "response")
         y_pred_resp <- as.numeric(y_pred_resp) -1
-        y_pred_prob <- predict(model, testdata, type = "prob")
+        y_pred_prob <- predict(model, testdata, type = "prob")[, 2]
         
       # for xgb models we need a xgb.DMatrix
-      } else if (model_type == "xgb") {
+      } else if (model_type == "XGBoost") {
         testdata_xgb <- select(testdata, features) %>% as.matrix()
         testdata_xgb <- xgb.DMatrix(data = testdata_xgb, label = y_true)
         y_pred_prob <- predict(model, testdata_xgb)
@@ -38,14 +37,138 @@ model_eval <- function(
             1, 0))
       }
       # logloss 
-      log_l <- MLmetrics::LogLoss(y_pred, y_true)
+      log_l <- MLmetrics::LogLoss(y_pred_prob, y_true)
+      
       # F1 scores
-      f_one <- MLmetrics::F1_Score(y_true, y_pred_resp)
+      f_one <- MLmetrics::F1_Score(
+        factor(y_true, levels = c("0", "1")), 
+        factor(y_pred_resp, levels = c("0", "1"))
+      )
     }
-  return(list("logloss" = log_l, "F1" = f_one))
+    
+    metric <- tibble(logloss = log_l, F1 = f_one)
+    return(metric)
 }
 
 
+# returns a list of lists where each list has a fitted model and the
+# corresponding testdata as items 
+fit_cv <- function(
+  data, 
+  features,
+  y,
+  p = 0.8, 
+  k = 10,
+  model_type = "randomForest",
+  ...
+  ) {
+    
+    dots <- list(...)
+    
+    # generate k datasets
+    train_indeces <- caret::createDataPartition(
+      data[[y]], 
+      p = p, 
+      times = k)
+    
+    # this will return a list of lists that each contain a fitted model and 
+    # the corresponding test dataset 
+    models_and_testdata <- map(train_indeces, function(ind) {
+      train <- data[ind, ]
+      test <- data[-ind, ]
+    
+      # fit randomForest 
+      if (model_type == "randomForest") {
+        model <- randomForest::randomForest(
+          y = train[[y]],
+          x = select(train, features),
+          ntree = dots$ntree,
+          importance = TRUE
+        )
+      } else if (model_type == "XGBoost") {
+    
+        # prepare xgb data matrix object
+        labels_train <- train[[y]] %>% as.numeric() -1 # one-hot-coding
+        labels_test <- test[[y]] %>% as.numeric() -1
+        train_xgb <- select(train, features) %>% as.matrix()
+        test_xgb <- select(test, features) %>% as.matrix()
+        train_xgb <- xgb.DMatrix(data = train_xgb, label = labels_train)
+        test_xgb <- xgb.DMatrix(data = test_xgb, label = labels_test)
+    
+        # set model parameters (this should be put in ... at some point)
+        params <- list(
+          booster = "gbtree",
+          objective = "binary:logistic",
+          eta = 0.3,
+          gamma = 0,
+          max_depth = 6,
+          min_child_weight = 1,
+          subsample = 1,
+          colsample_bytree = 1
+        )
+    
+        # fit model 
+        model <- xgb.train(
+          params = params,
+          data = train_xgb, 
+          nrounds = 10,
+          watchlist = list(val = test_xgb, train = train_xgb),
+          print_every_n = 10, 
+          early_stop_round = 10,
+          maximize = FALSE,
+          eval_metric = "logloss",
+          verbose = 0
+        )
+      }
+      # return fitted model and corresponding test data set
+      list(model, test)
+    })
+    return(models_and_testdata)
+}
+
+
+
+# summarises eval metrics 
+summarize_metrics <- function(models_and_data, y, model_type = "randomForest", features = features) {
+  map_dfr(models_and_data, function(model_and_data) {
+    model <- model_and_data[[1]]
+    testdata <- model_and_data[[2]]
+    model_eval(model, testdata, features = features, y = y, model_type = model_type) 
+  }) %>%
+    gather(metric, value) %>%
+    group_by(metric) %>%
+    summarise(mean = mean(value), sd = sd(value)) %>%
+    mutate_if(is.numeric, round, 2)
+}
+  
+plot_importance <- function(model, regression = T, top_n = NULL) {
+  if (regression) {
+    var_imp <- importance(model, type = 1)
+    var_imp <- var_imp %>% as.data.frame() %>%
+    rownames_to_column("variable") %>%
+    select(variable, inc_mse = `%IncMSE`) %>%
+    arrange(inc_mse) %>%
+    mutate(variable = factor(variable, level = variable))
+    if (!is.null(top_n)) {
+      var_imp <- tail(var_imp, top_n)
+    }
+    ggplot(var_imp, aes(variable, inc_mse)) +
+      geom_col() +
+      coord_flip() 
+  } else {
+    print("Please program this function for classification")  }
+}
+
+extract_importance <- function(model, n = 10) {
+      var_imp <- importance(model, type = 1)
+      var_imp <- var_imp %>% as.data.frame() %>%
+        rownames_to_column("variable") %>%
+        select(variable, inc_mse = `%IncMSE`) %>%
+        arrange(inc_mse) %>%
+        mutate(variable = factor(variable, level = variable)) %>%
+        tail(n)
+      return(var_imp)  
+}
 
 
 
@@ -55,24 +178,47 @@ model_eval <- function(
 #########################
 
 
+# Feature selection based on RF importance scores.
+# models_and_data is a list of list where each list contains a model object [1]
+# and the corresponding testdata [2] According to workflow in this script
+select_features <- function(models_and_data, id_name = "id", n_features = 50) {
+  top_predictors <- map(models_and_data, function(model_and_data) {
+    model <- model_and_data[[1]]
+  
+    top_predictors <- importance(model, type = 1, scale = F) %>%
+      as.data.frame() %>%
+      rownames_to_column(id_name) %>%
+      arrange(desc(MeanDecreaseAccuracy)) %>%
+      select(id_name) %>%
+      head(n_features)
+    }
+  )
+  
+  # only intersection of all k model is used
+  selected_features <- Reduce(intersect, top_predictors)
+  return(selected_features)
+}
+
+
 rf_cv <- function(
   data, 
-  predictors,
-  outcome,
+  features,
+  y,
   p = 0.8, 
-  times = 10,
+  k = 10,
   ntree = 5000
   ) {
     train_indeces <- caret::createDataPartition(
-      data[[outcome]], 
+      data[[y]], 
       p = p, 
-      times = times)
+      times = k)
+      
     map(train_indeces, function(ind) {
       train <- data[ind, ]
       test <- data[-ind, ]
-      model <- randomForest(
-        y = train[[outcome]],
-        x = select(train, predictors),
+      model <- randomForest::randomForest(
+        y = train[[y]],
+        x = select(train, features),
         ntree = ntree,
         importance = TRUE
       )
@@ -80,47 +226,46 @@ rf_cv <- function(
       })
     }
 
-rf_model_fit <- function(models_and_data, outcome, regression = TRUE) {
+rf_model_fit <- function(models_and_data, y, regression = TRUE) {
   p <- map(models_and_data, function(model_and_data) {
     
     model <- model_and_data[[1]]
     test <- model_and_data[[2]]
     if (regression) {
       preds <- predict(model, test)
-      p <- cor.test(test[[outcome]], preds)
+      p <- cor.test(test[[y]], preds)
       p <- round(p[4]$estimate, 3)
       rsq <- mean(model$rsq) %>% round(3)
       list(p, rsq)
     } else {
+      y_true <- as.numeric(test[[y]]) -1
       pred_prob <- predict(model, test, type = "prob")
-      log_l <- MLmetrics::LogLoss(pred_prob[, 2], as.numeric(test$group) - 1)
+      log_l <- MLmetrics::LogLoss(pred_prob[, 2], y_true)
       oob <- model$err.rate %>% as_tibble() %>% summarise_all(median)
       metric <- oob %>% mutate(log_l = log_l) %>%
         select(log_l, oob_avg = OOB, "0", "1")
       list(metric)
     }
-
-    
   })
   p
 }
 
 rf_summary <- function(
   data, 
-  predictors,
-  outcome,
+  features,
+  y,
   p = 0.8, 
-  times = 10,
+  k = 10,
   ntree = 5000,
   regression = TRUE) {
     model_and_data <- rf_cv(
       data,
-      predictors,
-      outcome,
+      features,
+      y,
       p = p, 
-      times = times,
+      k = k,
       ntree = ntree)
-    metric <- rf_model_fit(model_and_data, outcome = outcome, regression = regression)
+    metric <- rf_model_fit(model_and_data, y = y, regression = regression)
     if (regression) {
       p <- map_dfr(metric, function(list) {
         list[[1]]
@@ -145,7 +290,7 @@ rf_summary <- function(
         lower = quantile(value, 0.025), 
         upper = quantile(value, 0.975)
       ) %>%
-      mutate_if(is.numeric, round, 3)
+      mutate_if(is.numeric, round, 2)
     }
   }
   
@@ -250,6 +395,8 @@ plot_regression <- function(
 
 # diagnostic plots for frequentist regression (lm or lme4)
 lm_diag <- function(model, data, Y) {
+  # need some helper function defined elsewhere
+  source("https://raw.githubusercontent.com/HenrikEckermann/in_use/master/reporting.R")
   diag_df <- data %>%
   mutate( 
     sresid = resid(model), 
