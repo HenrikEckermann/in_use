@@ -51,7 +51,9 @@ model_eval <- function(
       p <- cor.test(testdata[[y]], preds)
       p <- round(p[4]$estimate, 3)
       rsq <- mean(model$rsq) %>% round(3)
-      list(p, rsq)
+      
+      metric <- tibble(p = p, rsq = rsq)
+      return(metric)
     }
     
     
