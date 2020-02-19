@@ -44,10 +44,18 @@ model_eval <- function(
         factor(y_true, levels = c("0", "1")), 
         factor(y_pred_resp, levels = c("0", "1"))
       )
+      metric <- tibble(logloss = log_l, F1 = f_one)
+      return(metric)
+    } else {
+      preds <- predict(model, testdata)
+      p <- cor.test(testdata[[y]], preds)
+      p <- round(p[4]$estimate, 3)
+      rsq <- mean(model$rsq) %>% round(3)
+      list(p, rsq)
     }
     
-    metric <- tibble(logloss = log_l, F1 = f_one)
-    return(metric)
+    
+    
 }
 
 
