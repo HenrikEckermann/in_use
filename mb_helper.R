@@ -85,6 +85,12 @@ otu_to_df <- function(pseq, level = "species", transpose = TRUE) {
 
 # add or edit otu table in pseq from df
 df_to_otu <- function(otu, level = "species", taxa_are_rows = TRUE) {
+  if (!taxa_are_rows) {
+    otu <- otu %>%
+      gather(!!enquo(level), abundance, -sample_id) %>%
+      spread(sample_id, abundance)
+    taxa_are_rows <- TRUE
+  } 
   otu %>% 
     column_to_rownames(level) %>%
     otu_table(taxa_are_rows = taxa_are_rows)
