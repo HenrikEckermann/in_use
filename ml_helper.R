@@ -191,14 +191,21 @@ extract_importance <- function(model, n = 10) {
 # Feature selection based on RF importance scores.
 # models_and_data is a list of list where each list contains a model object [1]
 # and the corresponding testdata [2] According to workflow in this script
-select_features <- function(models_and_data, id_name = "id", n_features = 50) {
+select_features <- function(
+  models_and_data, 
+  id_name = "id", 
+  n_features = 50,
+  regression = TRUE
+) {
   top_predictors <- map(models_and_data, function(model_and_data) {
     model <- model_and_data[[1]]
+  
+    measure <- ifelse(regression, "%IncMSE", "MeanDecreaseAccuracy")
   
     top_predictors <- importance(model, type = 1, scale = F) %>%
       as.data.frame() %>%
       rownames_to_column(id_name) %>%
-      arrange(desc(MeanDecreaseAccuracy)) %>%
+      arrange(desc(measure)) %>%
       select(id_name) %>%
       head(n_features)
     }
