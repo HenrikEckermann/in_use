@@ -206,7 +206,7 @@ select_features <- function(
     top_predictors <- importance(model, type = 1, scale = F) %>%
       as.data.frame() %>%
       rownames_to_column(id_name) %>%
-      arrange(desc(measure)) %>%
+      arrange(desc(all_of(importance_measure))) %>%
       select(id_name) %>%
       head(n_features)
     }
