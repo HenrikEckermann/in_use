@@ -139,11 +139,11 @@ fit_cv <- function(
 
 
 # summarises eval metrics 
-summarize_metrics <- function(models_and_data, y, model_type = "randomForest", features = features) {
+summarize_metrics <- function(models_and_data, y, model_type = "randomForest", features = features, classification = TRUE) {
   map_dfr(models_and_data, function(model_and_data) {
     model <- model_and_data[[1]]
     testdata <- model_and_data[[2]]
-    model_eval(model, testdata, features = features, y = y, model_type = model_type) 
+    model_eval(model, testdata, features = features, y = y, model_type = model_type, classification = classification) 
   }) %>%
     gather(metric, value) %>%
     group_by(metric) %>%
@@ -195,12 +195,13 @@ select_features <- function(
   models_and_data, 
   id_name = "id", 
   n_features = 50,
-  regression = TRUE
+  regression = TRUE,
+  ranger = FALSE,
+  importance_measure = ifelse(regression, "%IncMSE", "MeanDecreaseAccuracy")
 ) {
   top_predictors <- map(models_and_data, function(model_and_data) {
     model <- model_and_data[[1]]
   
-    measure <- ifelse(regression, "%IncMSE", "MeanDecreaseAccuracy")
   
     top_predictors <- importance(model, type = 1, scale = F) %>%
       as.data.frame() %>%
@@ -287,12 +288,12 @@ rf_summary <- function(
       p <- map_dfr(metric, function(list) {
         list[[1]]
        }) %>% gather(sample, value) %>%
-        summarise(mean = mean(value), sd = sd(value))
+        summarise(mean = mean(value), median = median(value), sd = sd(value))
         
       rsq <- map_dfr(metric, function(list) {
         list[[2]]
        }) %>% gather(sample, value) %>%
-        summarise(mean = mean(value), sd = sd(value))
+        summarise(mean = mean(value), median = median(value), sd = sd(value))
         
       list("p" = p, "rsq" = rsq)
       
