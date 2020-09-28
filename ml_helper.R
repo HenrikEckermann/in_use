@@ -1,5 +1,6 @@
 
 library(tidyverse)
+library(future)
 
 
 
@@ -14,7 +15,10 @@ model_eval <- function(
   features,
   y,  
   model_type = "randomForest", 
-  classification = TRUE) {
+  classification = TRUE,
+  null_test = FALSE,
+  null_dist = if(null_test) null_dist else NULL
+  ) {
     
     if (classification) {
       
@@ -49,15 +53,62 @@ model_eval <- function(
     } else {
       preds <- predict(model, testdata)
       p <- cor.test(testdata[[y]], preds)
+      if (null_test) {
+        p_value <- mean(null_dist > p[4]$estimate)
+      }
       p <- round(p[4]$estimate, 3)
       rsq <- mean(model$rsq) %>% round(3)
       
-      metric <- tibble(p = p, rsq = rsq)
+      metric <- tibble(
+        r = p, 
+        p_value = p_value,
+        rsq = rsq)
       return(metric)
     }
     
     
     
+}
+
+
+# returns null distribution or pearson cor for given test data 
+rf_null <- function(
+  y,
+  train = train,
+  test = test,
+  n_perm = 10,
+  ntree = 500
+  ) {
+    
+    p_null <- future_map_dbl(c(1:n_perm), function(iter) {
+      # permute outcome   
+      train_perm <- train 
+      train_perm$y_perm <- sample(
+        train[[y]],
+        replace = FALSE,
+        size = dim(train)[1])
+      train_perm <- select(train_perm, -y)
+      
+      test_perm$y_perm <- sample(
+        test[[y]],
+        replace = FALSE,
+        size = dim(test)[1])
+      test_perm <- select(test_perm, -y)
+    
+      # fit null model randomForest 
+      null_model <- randomForest::randomForest(
+        y = train$y_perm,
+        x = select(train, features),
+        ntree = ntree,
+        importance = FALSE
+      )
+      
+      # obtain pearson 
+      pred <- predict(fit_null, data = test)
+      pearson_r <- cor.test(test$y_perm, pred)
+      return(pearson_r$estimate[[1]])
+    })
+    return(p_null)  
 }
 
 
@@ -70,6 +121,7 @@ fit_cv <- function(
   p = 0.8, 
   k = 10,
   model_type = "randomForest",
+  null_test = FALSE,
   ...
   ) {
     
@@ -86,6 +138,8 @@ fit_cv <- function(
     models_and_testdata <- map(train_indeces, function(ind) {
       train <- data[ind, ]
       test <- data[-ind, ]
+      
+
     
       # fit randomForest 
       if (model_type == "randomForest") {
@@ -130,25 +184,49 @@ fit_cv <- function(
           verbose = 0
         )
       }
-      # return fitted model and corresponding test data set
-      list(model, test)
+      
+      if (null_test) {
+        null_dist <- rf_null(
+          y,
+          train,
+          test,
+          ntree = dots$ntree,
+          n_perm = 10
+        )
+        
+        return(list(model, test, null_dist))
+      } else {
+        # return fitted model and corresponding test data set
+        list(model, test)
+      }
+
     })
     return(models_and_testdata)
 }
 
 
 
+
+
+
+
 # summarises eval metrics 
-summarize_metrics <- function(models_and_data, y, model_type = "randomForest", features = features, classification = TRUE) {
-  map_dfr(models_and_data, function(model_and_data) {
-    model <- model_and_data[[1]]
-    testdata <- model_and_data[[2]]
-    model_eval(model, testdata, features = features, y = y, model_type = model_type, classification = classification) 
-  }) %>%
-    gather(metric, value) %>%
-    group_by(metric) %>%
-    summarise(mean = mean(value), sd = sd(value)) %>%
-    mutate_if(is.numeric, round, 2)
+summarize_metrics <- function(
+  models_and_data, 
+  y, 
+  model_type = "randomForest", 
+  features = features, 
+  classification = TRUE
+  ) {
+    map_dfr(models_and_data, function(model_and_data) {
+      model <- model_and_data[[1]]
+      testdata <- model_and_data[[2]]
+      model_eval(model, testdata, features = features, y = y, model_type = model_type, classification = classification) 
+    }) %>%
+      gather(metric, value) %>%
+      group_by(metric) %>%
+      summarise(mean = mean(value), sd = sd(value)) %>%
+      mutate_if(is.numeric, round, 2)
 }
   
 plot_importance <- function(model, regression = T, top_n = NULL) {
@@ -197,8 +275,7 @@ select_features <- function(
   n_features = 50,
   regression = TRUE,
   ranger = FALSE,
-  importance_measure = ifelse(regression, "%IncMSE", "MeanDecreaseAccuracy")
-) {
+  importance_measure = ifelse(regression, "%IncMSE", "MeanDecreaseAccuracy")) {
   top_predictors <- map(models_and_data, function(model_and_data) {
     model <- model_and_data[[1]]
   
