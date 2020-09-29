@@ -295,6 +295,13 @@ select_features <- function(
 }
 
 
+
+
+
+
+
+
+
 rf_cv <- function(
   data, 
   features,
@@ -321,28 +328,42 @@ rf_cv <- function(
       })
     }
 
-rf_model_fit <- function(models_and_data, y, regression = TRUE) {
-  p <- map(models_and_data, function(model_and_data) {
-    
-    model <- model_and_data[[1]]
-    test <- model_and_data[[2]]
-    if (regression) {
-      preds <- predict(model, test)
-      p <- cor.test(test[[y]], preds)
-      p <- round(p[4]$estimate, 3)
-      rsq <- mean(model$rsq) %>% round(3)
-      list(p, rsq)
-    } else {
-      y_true <- as.numeric(test[[y]]) -1
-      pred_prob <- predict(model, test, type = "prob")
-      log_l <- MLmetrics::LogLoss(pred_prob[, 2], y_true)
-      oob <- model$err.rate %>% as_tibble() %>% summarise_all(median)
-      metric <- oob %>% mutate(log_l = log_l) %>%
-        select(log_l, oob_avg = OOB, "0", "1")
-      list(metric)
-    }
-  })
-  p
+rf_model_fit <- function(
+  models_and_data, 
+  y, 
+  regression = TRUE, 
+  null_test = FALSE
+  ) {
+    p <- map(models_and_data, function(model_and_data) {
+      
+      model <- model_and_data[[1]]
+      test <- model_and_data[[2]]
+      if (null_test) {
+        null_dist <- model_and_data[[3]]
+      }
+      if (regression) {
+        preds <- predict(model, test)
+        p <- cor.test(test[[y]], preds)
+        p_value <- mean(null_dist > p))
+        rsq <- mean(model$rsq) %>% round(3)
+        if (null_test) {
+          p_value <- mean(null_dist > p)
+          list(round(p[4]$estimate, 3), p_value, rsq)
+        } else {
+          list(round(p[4]$estimate, 3), rsq)
+        }
+        
+      } else {
+        y_true <- as.numeric(test[[y]]) -1
+        pred_prob <- predict(model, test, type = "prob")
+        log_l <- MLmetrics::LogLoss(pred_prob[, 2], y_true)
+        oob <- model$err.rate %>% as_tibble() %>% summarise_all(median)
+        metric <- oob %>% mutate(log_l = log_l) %>%
+          select(log_l, oob_avg = OOB, "0", "1")
+        list(metric)
+      }
+    })
+    p
 }
 
 rf_summary <- function(
@@ -352,7 +373,9 @@ rf_summary <- function(
   p = 0.8, 
   k = 10,
   ntree = 5000,
-  regression = TRUE) {
+  regression = TRUE,
+  null_test = FALSE
+  ) {
     model_and_data <- rf_cv(
       data,
       features,
@@ -360,7 +383,12 @@ rf_summary <- function(
       p = p, 
       k = k,
       ntree = ntree)
-    metric <- rf_model_fit(model_and_data, y = y, regression = regression)
+    metric <- rf_model_fit(
+      model_and_data, 
+      y = y, 
+      regression = regression, 
+      null_test = null_test
+    )
     if (regression) {
       p <- map_dfr(metric, function(list) {
         list[[1]]
