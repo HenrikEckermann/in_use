@@ -344,7 +344,7 @@ rf_model_fit <- function(
       if (regression) {
         preds <- predict(model, test)
         p <- cor.test(test[[y]], preds)
-        p_value <- mean(null_dist > p))
+        p_value <- mean(null_dist > p)
         rsq <- mean(model$rsq) %>% round(3)
         if (null_test) {
           p_value <- mean(null_dist > p)
