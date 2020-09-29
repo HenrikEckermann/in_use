@@ -74,6 +74,7 @@ model_eval <- function(
 # returns null distribution or pearson cor for given test data 
 rf_null <- function(
   y,
+  features,
   train = train,
   test = test,
   n_perm = 10,
@@ -189,6 +190,7 @@ fit_cv <- function(
       if (null_test) {
         null_dist <- rf_null(
           y,
+          features,
           train,
           test,
           ntree = dots$ntree,
