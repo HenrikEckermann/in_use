@@ -400,7 +400,23 @@ rf_summary <- function(
        }) %>% gather(sample, value) %>%
         summarise(mean = mean(value), median = median(value), sd = sd(value))
         
-      list("p" = p, "rsq" = rsq)
+      if (null_test) {
+        df1 <- map_dfr(metric, function(list) {
+          list[[1]]
+        }) %>% gather(sample, r)
+        df2 <- map_dfr(metric, function(list) {
+          list[[3]]
+        }) %>% gather(sample, p_value)
+        p_value <- left_join(df1, df2, by = "sample") %>% filter(r == median(r)) %>%
+          .$p_value[1]
+      }
+      
+      if (null_test) {
+        list("p" = p, "p_value" = p_value, "rsq" = rsq)
+      } else {
+        list("p" = p, "rsq" = rsq)
+      }
+      
       
     } else {
       map_dfr(metric, ~bind_rows(.x)) %>%
