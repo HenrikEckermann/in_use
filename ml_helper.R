@@ -1,6 +1,6 @@
 
 library(tidyverse)
-library(future)
+library(furrr)
 
 
 
@@ -83,6 +83,7 @@ rf_null <- function(
     p_null <- future_map_dbl(c(1:n_perm), function(iter) {
       # permute outcome   
       train_perm <- train 
+      test_perm <- test
       train_perm$y_perm <- sample(
         train[[y]],
         replace = FALSE,
