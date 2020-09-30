@@ -27,9 +27,9 @@ model_eval <- function(
       
       # for most models we can get predictions like this
       if (model_type == "randomForest") {
-        y_pred_resp <- predict(model, testdata, type = "response")
+        y_pred_resp <- predict(model, newdata = testdata, type = "response")
         y_pred_resp <- as.numeric(y_pred_resp) -1
-        y_pred_prob <- predict(model, testdata, type = "prob")[, 2]
+        y_pred_prob <- predict(model, newdata = testdata, type = "prob")[, 2]
         
       # for xgb models we need a xgb.DMatrix
       } else if (model_type == "XGBoost") {
@@ -51,7 +51,7 @@ model_eval <- function(
       metric <- tibble(logloss = log_l, F1 = f_one)
       return(metric)
     } else {
-      preds <- predict(model, testdata)
+      preds <- predict(model, newdata = testdata)
       p <- cor.test(testdata[[y]], preds)
       if (null_test) {
         p_value <- mean(null_dist > p[4]$estimate)
@@ -61,8 +61,8 @@ model_eval <- function(
       
       metric <- tibble(
         r = p, 
-        p_value = p_value,
-        rsq = rsq)
+        rsq = rsq,
+        p_value = p_value)
       return(metric)
     }
     
@@ -99,15 +99,15 @@ rf_null <- function(
     
       # fit null model randomForest 
       null_model <- randomForest::randomForest(
-        y = train$y_perm,
+        y = train_perm$y_perm,
         x = select(train, features),
         ntree = ntree,
         importance = FALSE
       )
       
       # obtain pearson 
-      pred <- predict(fit_null, data = test)
-      pearson_r <- cor.test(test$y_perm, pred)
+      pred <- predict(null_model, newdata = test_perm)
+      pearson_r <- cor.test(test_perm$y_perm, pred)
       return(pearson_r$estimate[[1]])
     })
     return(p_null)  
@@ -311,7 +311,8 @@ rf_cv <- function(
   y,
   p = 0.8, 
   k = 10,
-  ntree = 5000
+  ntree = 5000,
+  null_test = FALSE
   ) {
     train_indeces <- caret::createDataPartition(
       data[[y]], 
@@ -327,7 +328,22 @@ rf_cv <- function(
         ntree = ntree,
         importance = TRUE
       )
-      list(model, test)
+      
+      if (null_test) {
+        null_dist <- rf_null(
+          y,
+          features,
+          train,
+          test,
+          ntree = ntree,
+          n_perm = 10
+        )
+        
+        return(list(model, test, null_dist))
+      } else {
+        # return fitted model and corresponding test data set
+        list(model, test)
+      }
       })
     }
 
@@ -345,20 +361,19 @@ rf_model_fit <- function(
         null_dist <- model_and_data[[3]]
       }
       if (regression) {
-        preds <- predict(model, test)
+        preds <- predict(model, newdata = test)
         p <- cor.test(test[[y]], preds)
-        p_value <- mean(null_dist > p)
         rsq <- mean(model$rsq) %>% round(3)
         if (null_test) {
-          p_value <- mean(null_dist > p)
-          list(round(p[4]$estimate, 3), p_value, rsq)
+          p_value <- mean(null_dist > p[4]$estimate)
+          list(round(p[4]$estimate, 3), rsq, p_value)
         } else {
           list(round(p[4]$estimate, 3), rsq)
         }
         
       } else {
         y_true <- as.numeric(test[[y]]) -1
-        pred_prob <- predict(model, test, type = "prob")
+        pred_prob <- predict(model, newdata = test, type = "prob")
         log_l <- MLmetrics::LogLoss(pred_prob[, 2], y_true)
         oob <- model$err.rate %>% as_tibble() %>% summarise_all(median)
         metric <- oob %>% mutate(log_l = log_l) %>%
@@ -385,11 +400,13 @@ rf_summary <- function(
       y,
       p = p, 
       k = k,
-      ntree = ntree)
+      ntree = ntree,
+      null_test = null_test
+    )
     metric <- rf_model_fit(
       model_and_data, 
       y = y, 
-      regression = regression, 
+      regression = regression,
       null_test = null_test
     )
     if (regression) {
@@ -406,16 +423,17 @@ rf_summary <- function(
       if (null_test) {
         df1 <- map_dfr(metric, function(list) {
           list[[1]]
-        }) %>% gather(sample, r)
+          }) %>% gather(sample, r)
         df2 <- map_dfr(metric, function(list) {
           list[[3]]
-        }) %>% gather(sample, p_value)
-        p_value <- left_join(df1, df2, by = "sample") %>% filter(r == median(r)) %>%
-          .$p_value[1]
+          }) %>% gather(sample, p_value)
+        p_value <- bind_cols(df1, df2) %>% filter(r == median(r)) %>%
+          .$p_value
+        p_value <- p_value[1]
       }
       
       if (null_test) {
-        list("p" = p, "p_value" = p_value, "rsq" = rsq)
+        list("p" = p, "rsq" = rsq, "p_value" = p_value)
       } else {
         list("p" = p, "rsq" = rsq)
       }
@@ -508,7 +526,7 @@ plot_regression <- function(
         f_ll = Q2.5,
         f_ul = Q97.5
     ) 
-    pred <- predict(model, newdata) %>% 
+    pred <- predict(model, newdata = newdata) %>% 
              as_tibble() %>%
              transmute(p_ll = Q2.5, p_ul = Q97.5)
     df <- bind_cols(newdata, pred, df)
