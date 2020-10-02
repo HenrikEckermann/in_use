@@ -83,7 +83,7 @@ rf_null <- function(
     
     p_null <- future_map_dbl(c(1:n_perm), function(iter) {
       # permute outcome   
-      train_perm <- train 
+      train_perm = train 
       test_perm <- test
       train_perm$y_perm <- sample(
         train[[y]],
@@ -124,7 +124,7 @@ fit_cv <- function(
   k = 10,
   model_type = "randomForest",
   null_test = FALSE,
-  n_perm <- if (null_test) 1e3 else NULL
+  n_perm = if (null_test) 1e3 else NULL
   ...
   ) {
     
@@ -314,7 +314,7 @@ rf_cv <- function(
   k = 10,
   ntree = 5000,
   null_test = FALSE,
-  n_perm <- if (null_test) 1e3 else NULL
+  n_perm = if (null_test) 1e3 else NULL
   ) {
     train_indeces <- caret::createDataPartition(
       data[[y]], 
