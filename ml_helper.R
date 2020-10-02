@@ -124,7 +124,7 @@ fit_cv <- function(
   k = 10,
   model_type = "randomForest",
   null_test = FALSE,
-  n_perm = if (null_test) 1e3 else NULL
+  n_perm = if (null_test) 1e3 else NULL,
   ...
   ) {
     
