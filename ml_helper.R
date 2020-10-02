@@ -77,8 +77,8 @@ rf_null <- function(
   features,
   train = train,
   test = test,
-  n_perm = 10,
-  ntree = 500
+  n_perm = 1e3,
+  ntree = 5000
   ) {
     
     p_null <- future_map_dbl(c(1:n_perm), function(iter) {
@@ -124,6 +124,7 @@ fit_cv <- function(
   k = 10,
   model_type = "randomForest",
   null_test = FALSE,
+  n_perm <- if (null_test) 1e3 else NULL
   ...
   ) {
     
@@ -194,7 +195,7 @@ fit_cv <- function(
           train,
           test,
           ntree = dots$ntree,
-          n_perm = 10
+          n_perm = n_perm
         )
         
         return(list(model, test, null_dist))
@@ -312,7 +313,8 @@ rf_cv <- function(
   p = 0.8, 
   k = 10,
   ntree = 5000,
-  null_test = FALSE
+  null_test = FALSE,
+  n_perm <- if (null_test) 1e3 else NULL
   ) {
     train_indeces <- caret::createDataPartition(
       data[[y]], 
@@ -336,7 +338,7 @@ rf_cv <- function(
           train,
           test,
           ntree = ntree,
-          n_perm = 10
+          n_perm = n_perm
         )
         
         return(list(model, test, null_dist))
