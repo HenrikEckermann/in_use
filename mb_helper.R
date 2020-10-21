@@ -136,7 +136,7 @@ biplot <- function(
     # extract loadings
     pcx_rot <- 
         pcx$rotation %>%
-            as.tibble() %>%
+            as_tibble() %>%
             mutate_all(function(x) x * scaling_factor) %>%
             add_column(taxa = rownames(pcx$rotation))
     
