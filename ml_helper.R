@@ -78,7 +78,7 @@ rf_null <- function(
   train = train,
   test = test,
   n_perm = 1e3,
-  ntree = 5000
+  ntree = 2500
   ) {
     
     p_null <- future_map_dbl(c(1:n_perm), function(iter) {
