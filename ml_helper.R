@@ -1,6 +1,8 @@
 
 library(tidyverse)
 library(furrr)
+library(mlr) 
+library(tuneRanger)
 
 
 
@@ -8,13 +10,23 @@ library(furrr)
 ###     ML General    ### --------------------------------------
 #########################
 
+# get very rough estimate of a good ntree/computation trade off 
+plot_ntree <- function(x, y, ntree = 1e4) {
+  ntreeplot <- randomForest::randomForest(
+    x = x,
+    y = y,
+    ntree = ntree
+  )
+  plot(ntreeplot)
+}
+
 # returns df of our eval metrics (logloss and F1)
 model_eval <- function(
   model, 
   testdata, 
   features,
   y,  
-  model_type = "randomForest", 
+  model_type = "ranger", 
   classification = TRUE,
   null_test = FALSE,
   null_dist = if(null_test) null_dist else NULL
@@ -22,24 +34,31 @@ model_eval <- function(
     
     if (classification) {
       
-      # what we need for all classfication models
+      # we need the groups as 0/1 values
       y_true <- as.numeric(testdata[[y]]) -1
       
-      # for most models we can get predictions like this
+      # obtain predictions (this is little different for each algorithm)
+      # randomForest
       if (model_type == "randomForest") {
         y_pred_resp <- predict(model, newdata = testdata, type = "response")
         y_pred_resp <- as.numeric(y_pred_resp) -1
         y_pred_prob <- predict(model, newdata = testdata, type = "prob")[, 2]
-        
+      # ranger
+      } else if (model_type == "ranger") {
+        y_pred_resp <- predict(model, data = testdata)$predictions
+        y_pred_resp <- as.numeric(y_pred_resp) -1
+        # to obtain prob you need to fit a prob tree to begin with
+        y_pred_prob <- predict(model, data = testdata)$predictions
+      }
       # for xgb models we need a xgb.DMatrix
       } else if (model_type == "XGBoost") {
-        testdata_xgb <- select(testdata, features) %>% as.matrix()
+        testdata_xgb <- select(testdata, all_of(features)) %>% as.matrix()
         testdata_xgb <- xgb.DMatrix(data = testdata_xgb, label = y_true)
         y_pred_prob <- predict(model, testdata_xgb)
         y_pred_resp <- ifelse(y_pred_prob == 0.5, 
           rbinom(n = 1, size = 1, p = 0.5), ifelse(y_pred_prob > 0.5,
             1, 0))
-      }
+
       # logloss 
       log_l <- MLmetrics::LogLoss(y_pred_prob, y_true)
       
@@ -51,8 +70,14 @@ model_eval <- function(
       metric <- tibble(logloss = log_l, F1 = f_one)
       return(metric)
     } else {
-      preds <- predict(model, newdata = testdata)
-      p <- cor.test(testdata[[y]], preds)
+      if (model_type == "randomForest") {
+        y_pred <- predict(model, newdata = testdata, type = "response")
+      # ranger
+      } else if (model_type == "ranger") {
+        y_pred <- predict(model, data = testdata)$predictions
+      }
+
+      p <- cor.test(testdata[[y]], y_pred)
       if (null_test) {
         p_value <- mean(null_dist > p[4]$estimate)
       }
@@ -77,8 +102,8 @@ rf_null <- function(
   features,
   train = train,
   test = test,
-  n_perm = 1e3,
-  ntree = 2500
+  n_perm = 500,
+  ntree = 500
   ) {
     
     p_null <- future_map_dbl(c(1:n_perm), function(iter) {
@@ -89,25 +114,26 @@ rf_null <- function(
         train[[y]],
         replace = FALSE,
         size = dim(train)[1])
-      train_perm <- select(train_perm, -y)
+      train_perm <- select(train_perm, -all_of(y))
       
       test_perm$y_perm <- sample(
         test[[y]],
         replace = FALSE,
         size = dim(test)[1])
-      test_perm <- select(test_perm, -y)
+      test_perm <- select(test_perm, -all_of(y))
     
-      # fit null model randomForest 
-      null_model <- randomForest::randomForest(
+      # fit null model ranger
+      null_model <- ranger::ranger(
         y = train_perm$y_perm,
-        x = select(train, features),
-        ntree = ntree,
-        importance = FALSE
+        x = select(train, all_of(features)),
+        num.trees  = ntree,
+        importance = "none",
+        probability = probability
       )
       
       # obtain pearson 
-      pred <- predict(null_model, newdata = test_perm)
-      pearson_r <- cor.test(test_perm$y_perm, pred)
+      y_pred <- predict(null_model, data = test_perm)$predictions
+      pearson_r <- cor.test(test_perm$y_perm, y_pred)
       return(pearson_r$estimate[[1]])
     })
     return(p_null)  
@@ -120,21 +146,31 @@ fit_cv <- function(
   data, 
   features,
   y,
-  p = 0.8, 
+  method = "cv",
+  p = ifelse(method == "resample", 0.8, NULL),
   k = 10,
-  model_type = "randomForest",
+  model_type = "ranger",
   null_test = FALSE,
-  n_perm = if (null_test) 1e3 else NULL,
+  n_perm = if (null_test) 500 else NULL,
   ...
   ) {
     
     dots <- list(...)
     
-    # generate k datasets
-    train_indeces <- caret::createDataPartition(
-      data[[y]], 
-      p = p, 
-      times = k)
+    # cv/resample 
+    if (method == "cv") {
+      train_indeces <- caret::createFolds(
+        data[[y]], 
+        k = k,
+        returnTrain = TRUE)
+      
+    } else if (method == "resample") {
+      train_indeces <- caret::createDataPartition(
+        data[[y]], 
+        p = p, 
+        times = k)
+    }
+
     
     # this will return a list of lists that each contain a fitted model and 
     # the corresponding test dataset 
@@ -148,17 +184,24 @@ fit_cv <- function(
       if (model_type == "randomForest") {
         model <- randomForest::randomForest(
           y = train[[y]],
-          x = select(train, features),
+          x = select(train, all_of(features)),
           ntree = dots$ntree,
-          importance = TRUE
+          importance = "permutation"
+        )
+      } else if (model_type == "ranger") {
+        model <- ranger::ranger(
+          y = train[[y]],
+          x = select(train, all_of(features)),
+          ntree = dots$ntree,
+          importance = "permutation",
+          probability = probability
         )
       } else if (model_type == "XGBoost") {
-    
         # prepare xgb data matrix object
         labels_train <- train[[y]] %>% as.numeric() -1 # one-hot-coding
         labels_test <- test[[y]] %>% as.numeric() -1
-        train_xgb <- select(train, features) %>% as.matrix()
-        test_xgb <- select(test, features) %>% as.matrix()
+        train_xgb <- select(train, all_of(features)) %>% as.matrix()
+        test_xgb <- select(test, all_of(features)) %>% as.matrix()
         train_xgb <- xgb.DMatrix(data = train_xgb, label = labels_train)
         test_xgb <- xgb.DMatrix(data = test_xgb, label = labels_test)
     
@@ -218,7 +261,7 @@ fit_cv <- function(
 summarize_metrics <- function(
   models_and_data, 
   y, 
-  model_type = "randomForest", 
+  model_type = "ranger", 
   features = features, 
   classification = TRUE
   ) {
@@ -233,33 +276,36 @@ summarize_metrics <- function(
       mutate_if(is.numeric, round, 2)
 }
   
-plot_importance <- function(model, regression = T, top_n = NULL) {
-  if (regression) {
-    var_imp <- importance(model, type = 1)
-    var_imp <- var_imp %>% as.data.frame() %>%
-    rownames_to_column("variable") %>%
-    select(variable, inc_mse = `%IncMSE`) %>%
-    arrange(inc_mse) %>%
-    mutate(variable = factor(variable, level = variable))
-    if (!is.null(top_n)) {
-      var_imp <- tail(var_imp, top_n)
-    }
-    ggplot(var_imp, aes(variable, inc_mse)) +
-      geom_col() +
-      coord_flip() 
-  } else {
-    print("Please program this function for classification")  }
+plot_importance <- function(model, top_n = NULL) {
+  var_imp <- importance(model, type = 1)
+  var_imp <- var_imp %>% as.data.frame() 
+  imp_name <- colnames(var_imp)[1]
+  
+  var_imp <- var_imp %>%
+    rownames_to_column("features") %>%
+    select(features, importance = all_of(imp_name)) %>%
+    arrange(importance) %>%
+    mutate(features = factor(features, level = features))
+  if (!is.null(top_n)) {
+    var_imp <- tail(var_imp, top_n)
+  }
+  ggplot(var_imp, aes(features, importance)) +
+    geom_col() +
+    coord_flip() 
+
 }
 
 extract_importance <- function(model, n = 10) {
-      var_imp <- importance(model, type = 1)
-      var_imp <- var_imp %>% as.data.frame() %>%
-        rownames_to_column("variable") %>%
-        select(variable, inc_mse = `%IncMSE`) %>%
-        arrange(inc_mse) %>%
-        mutate(variable = factor(variable, level = variable)) %>%
-        tail(n)
-      return(var_imp)  
+  var_imp <- importance(model, type = 1)
+  var_imp <- var_imp %>% as.data.frame() 
+  imp_name <- colnames(var_imp)[1]
+  var_imp <- var_imp %>%
+    rownames_to_column("features") %>%
+    select(features, importance = all_of(imp_name)) %>%
+    arrange(importance) %>%
+    mutate(variable = factor(features, level = features)) %>%
+    tail(n)
+  return(var_imp)  
 }
 
 
@@ -276,19 +322,18 @@ extract_importance <- function(model, n = 10) {
 select_features <- function(
   models_and_data, 
   id_name = "id", 
-  n_features = 50,
-  regression = TRUE,
-  ranger = FALSE,
-  importance_measure = ifelse(regression, "%IncMSE", "MeanDecreaseAccuracy")) {
+  n_features = 50) {
   top_predictors <- map(models_and_data, function(model_and_data) {
     model <- model_and_data[[1]]
   
   
-    top_predictors <- importance(model, type = 1, scale = F) %>%
-      as.data.frame() %>%
+    top_predictors <- importance(model, type = 1) %>%
+      as.data.frame()
+    imp_name <- colnames(top_predictors)[1]
+    top_predictors <- top_predictors %>%
       rownames_to_column(id_name) %>%
-      arrange(desc(all_of(importance_measure))) %>%
-      select(id_name) %>%
+      arrange(desc(all_of(imp_name))) %>%
+      select(all_of(id_name)) %>%
       head(n_features)
     }
   )
@@ -300,8 +345,62 @@ select_features <- function(
 
 
 
+tune_rf <- function(
+  data, 
+  features, 
+  y, 
+  regression = TRUE,
+  measure = NULL, 
+  iters = 70, 
+  iters.warmup = 30,
+  time.budget = NULL, 
+  num.threads = NULL, 
+  num.trees = 1000,
+  parameters = list(
+    replace = FALSE, 
+    respect.unordered.factors = "order"
+  ), 
+  tune.parameters = c(
+    "mtry", 
+    "min.node.size",
+    "sample.fraction"
+  ), 
+  save.file.path = NULL, 
+  build.final.model = FALSE,
+  show.info = getOption("mlrMBO.show.info", TRUE)
+  ) {
+    # names must be compatible with mlr 
+    d <- select(data, all_of(features), all_of(y))
+    colnames(d) <- make.names(colnames(d), unique = T)
+    if (regression) {
+      tune_task <- makeRegrTask(
+        data = d,
+        target = y
+      )
+    } else {
+      tune_task <- makeClassifTask(
+        data = d,
+        target = y
+      )
+    }
 
-
+    estimateTimeTuneRanger(tune_task)
+    res <- tuneRanger(
+      tune_task, 
+      measure = measure, 
+      iters = iters, 
+      iters.warmup = iters.warmup,
+      time.budget = time.budget, 
+      num.threads = num.threads, 
+      num.trees = num.trees,
+      parameters = parameters, 
+      tune.parameters = tune.parameters,
+      save.file.path = save.file.path, 
+      build.final.model = build.final.model,
+      show.info = show.info
+    )
+    res
+}
 
 
 
@@ -310,25 +409,88 @@ rf_cv <- function(
   data, 
   features,
   y,
-  p = 0.8, 
+  method = "cv",
+  p = ifelse(method == "resample", 0.8, NULL),
   k = 10,
-  ntree = 5000,
+  ntree = 500,
   null_test = FALSE,
-  n_perm = if (null_test) 1e3 else NULL
+  n_perm = if (null_test) 500 else NULL,
+  regression = TRUE, 
+  probability = ifelse(regression, FALSE, TRUE),
+  ...
   ) {
-    train_indeces <- caret::createDataPartition(
-      data[[y]], 
-      p = p, 
-      times = k)
+    
+    # additional arguments for ranger 
+    dots <- list(...)
+    ranger_params <- list()
+    if ("mtry" %in% names(dots)) {
+      ranger_params[["mtry"]] <- dots[["mtry"]]
+    }  else {
+      ranger_params[["mtry"]] <- NULL
+    }
+    if ("min.node.size" %in% names(dots)) {
+      ranger_params[["min.node.size"]] <- dots[["min.node.size"]]
+    }  else {
+      ranger_params[["min.node.size"]] <- NULL
+    }
+    if ("replace" %in% names(dots)) {
+      ranger_params[["replace"]] <- dots[["replace"]]
+    }  else {
+      ranger_params[["replace"]] <- FALSE
+    }   
+    if ("sample.fraction" %in% names(dots)) {
+      ranger_params[["sample.fraction"]] <- dots[["sample.fraction"]]
+    }  else {
+      ranger_params[["sample.fraction"]] <- ifelse(ranger_params[["replace"]], 1, 0.632)
+    } 
+    if ("splitrule" %in% names(dots)) {
+      ranger_params[["splitrule"]] <- dots[["splitrule"]]
+    }  else {
+      ranger_params[["splitrule"]] <- NULL
+    } 
+    if ("num.random.splits" %in% names(dots)) {
+      ranger_params[["num.random.splits"]] <- dots[["num.random.splits"]]
+    }  else {
+      ranger_params[["num.random.splits"]] <- 1
+    } 
+    if ("scale.permutation.importance" %in% names(dots)) {
+      ranger_params[["scale.permutation.importance"]] <- dots[["scale.permutation.importance"]]
+    }  else {
+      ranger_params[["scale.permutation.importance"]] <- FALSE
+    }
+    
+
+    # cv/resample 
+    if (method == "cv") {
+      train_indeces <- caret::createFolds(
+        data[[y]], 
+        k = k,
+        returnTrain = TRUE)
       
+    } else if (method == "resample") {
+      train_indeces <- caret::createDataPartition(
+        data[[y]], 
+        p = p, 
+        times = k)
+    }
+    
+
     map(train_indeces, function(ind) {
       train <- data[ind, ]
       test <- data[-ind, ]
-      model <- randomForest::randomForest(
+      model <- ranger::ranger(
         y = train[[y]],
-        x = select(train, features),
-        ntree = ntree,
-        importance = TRUE
+        x = select(train, all_of(features)),
+        num.trees  = ntree,
+        importance = "permutation",
+        probability = probability,
+        mtry = ranger_params[["mtry"]],
+        min.node.size = ranger_params[["min.node.size"]],
+        replace = ranger_params[["replace"]],
+        sample.fraction = ranger_params[["sample.fraction"]],
+        splitrule = ranger_params[["splitrule"]],
+        num.random.splits = ranger_params[["num.random.splits"]],
+        scale.permutation.importance = ranger_params[["scale.permutation.importance"]]        
       )
       
       if (null_test) {
@@ -363,9 +525,9 @@ rf_model_fit <- function(
         null_dist <- model_and_data[[3]]
       }
       if (regression) {
-        preds <- predict(model, newdata = test)
-        p <- cor.test(test[[y]], preds)
-        rsq <- mean(model$rsq) %>% round(3)
+        y_pred <- predict(model, data = test)$predictions
+        p <- cor.test(test[[y]], y_pred)
+        rsq <- model$r.squared %>% round(3)
         if (null_test) {
           p_value <- mean(null_dist > p[4]$estimate)
           list(round(p[4]$estimate, 3), rsq, p_value)
@@ -375,11 +537,11 @@ rf_model_fit <- function(
         
       } else {
         y_true <- as.numeric(test[[y]]) -1
-        pred_prob <- predict(model, newdata = test, type = "prob")
-        log_l <- MLmetrics::LogLoss(pred_prob[, 2], y_true)
-        oob <- model$err.rate %>% as_tibble() %>% summarise_all(median)
-        metric <- oob %>% mutate(log_l = log_l) %>%
-          select(log_l, oob_avg = OOB, "0", "1")
+        # only works if you specified ranger as probability tree
+        y_pred_prob <- predict(model, data = test)$predictions
+        log_l <- MLmetrics::LogLoss(y_pred_prob[, 2], y_true)
+        oob <- model$prediction.error
+        metric <- tibble(oob = oob, log_l = log_l) 
         list(metric)
       }
     })
@@ -392,9 +554,10 @@ rf_summary <- function(
   y,
   p = 0.8, 
   k = 10,
-  ntree = 5000,
+  ntree = 500,
   regression = TRUE,
-  null_test = FALSE
+  null_test = FALSE,
+  probability = ifelse(regression, FALSE, TRUE)
   ) {
     model_and_data <- rf_cv(
       data,
@@ -443,7 +606,6 @@ rf_summary <- function(
       
     } else {
       map_dfr(metric, ~bind_rows(.x)) %>%
-      select(oob_class_0 = "0", oob_class_1 = "1", everything()) %>%
       gather(statistic, value) %>% 
       group_by(statistic) %>%
       summarise(
@@ -455,34 +617,87 @@ rf_summary <- function(
       mutate_if(is.numeric, round, 2)
     }
   }
-  
-plot_importance <- function(model, regression = T, top_n = NULL) {
-  if (regression) {
-    var_imp <- importance(model, type = 1)
-    var_imp <- var_imp %>% as.data.frame() %>%
-    rownames_to_column("variable") %>%
-    select(variable, inc_mse = `%IncMSE`) %>%
-    arrange(inc_mse) %>%
-    mutate(variable = factor(variable, level = variable))
-    if (!is.null(top_n)) {
-      var_imp <- tail(var_imp, top_n)
-    }
-    ggplot(var_imp, aes(variable, inc_mse)) +
-      geom_col() +
-      coord_flip() 
-  } else {
-    print("Please program this function for classification")  }
+
+rf_rcv <- function(
+  data, 
+  features,
+  y,
+  method = "cv",
+  p = ifelse(method == "resample", 0.8, NULL),
+  k = 10,
+  ntree = 500,
+  null_test = FALSE,
+  n_perm = if (null_test) 500 else NULL,
+  regression = TRUE,
+  probability = ifelse(regression, FALSE, TRUE),
+  repeated = 10) {
+    all_model_and_data <- map(c(1:repeated), function(reo) {
+      model_and_data <- rf_cv(
+        data, 
+        features,
+        y,
+        method = method,
+        p = p,
+        k = k,
+        ntree = ntree,
+        null_test = null_test,
+        n_perm = n_perm,
+        regression = regression,
+        probability = probability
+      )
+    })
+    flatten(all_model_and_data)
+  }
+
+
+get_oob <- function(model_and_data, summarise = TRUE) {
+  metric <- map_dfc(model_and_data, function(md) {
+    md[[1]]$prediction.error
+  }) %>% pivot_longer(everything(), names_to = "fold", values_to = "oob")
+    
+  if (summarise) {
+    metric <- metric %>%
+      summarise(
+        median = median(oob),
+        mean = mean(oob),
+        sd = sd(oob),
+        lower = quantile(oob, 0.025),
+        upper = quantile(oob, 0.975)
+        )
+      }
+  metric
 }
 
-extract_importance <- function(model, n = 10) {
-      var_imp <- importance(model, type = 1)
-      var_imp <- var_imp %>% as.data.frame() %>%
-        rownames_to_column("variable") %>%
-        select(variable, inc_mse = `%IncMSE`) %>%
-        arrange(inc_mse) %>%
-        mutate(variable = factor(variable, level = variable)) %>%
-        tail(n)
-      return(var_imp)  
+# thanks to Artem Sokolov: https://stackoverflow.com/questions/45676745/how-to-calculate-the-auc-value-for-a-ranger-rf-model
+auc_roc <- function(scores, labels){
+  stopifnot( length(scores) == length(labels) )
+  jp <- which( labels > 0 ); np <- length( jp )
+  jn <- which( labels <= 0); nn <- length( jn )
+  s0 <- sum( rank(scores)[jp] )
+  (s0 - np*(np+1) / 2) / (np*nn)
+}
+
+
+get_auc <- function(model_and_data, y, summarise = TRUE) {
+  metric <- map_dfr(model_and_data, function(md) {
+    fit <- md[[1]]
+    test <- md[[2]]
+    y_pred <- predict(fit, data = test)$predictions[, 2]
+    y_true <- as.numeric(test[[y]]) - 1
+    list(auc = auc_roc(y_pred, y_true))
+    }) %>% pivot_longer(everything(), names_to = "fold", values_to = "auc")
+    
+  if (summarise) {
+    metric <- metric %>%
+      summarise(
+        median = median(auc),
+        mean = mean(auc),
+        sd = sd(auc),
+        lower = quantile(auc, 0.025),
+        upper = quantile(auc, 0.975)
+      )
+    }
+  metric
 }
 
 
@@ -528,10 +743,10 @@ plot_regression <- function(
         f_ll = Q2.5,
         f_ul = Q97.5
     ) 
-    pred <- predict(model, newdata = newdata) %>% 
+    y_pred <- predict(model, newdata = newdata) %>% 
              as_tibble() %>%
              transmute(p_ll = Q2.5, p_ul = Q97.5)
-    df <- bind_cols(newdata, pred, df)
+    df <- bind_cols(newdata, y_pred, df)
       
     if(!counterfactual) {
       p <- ggplot(df, aes_string(x, "Estimate")) +
