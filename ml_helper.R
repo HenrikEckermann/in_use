@@ -3,7 +3,7 @@ library(tidyverse)
 library(furrr)
 library(mlr) 
 library(tuneRanger)
-
+library(ranger)
 
 
 #########################
@@ -303,7 +303,7 @@ extract_importance <- function(model, n = 10) {
     rownames_to_column("features") %>%
     select(features, importance = all_of(imp_name)) %>%
     arrange(importance) %>%
-    mutate(variable = factor(features, level = features)) %>%
+    mutate(features = factor(features, level = features)) %>%
     tail(n)
   return(var_imp)  
 }
@@ -355,7 +355,7 @@ tune_rf <- function(
   iters.warmup = 30,
   time.budget = NULL, 
   num.threads = NULL, 
-  num.trees = 1000,
+  ntree = 1000,
   parameters = list(
     replace = FALSE, 
     respect.unordered.factors = "order"
@@ -392,7 +392,7 @@ tune_rf <- function(
       iters.warmup = iters.warmup,
       time.budget = time.budget, 
       num.threads = num.threads, 
-      num.trees = num.trees,
+      num.trees = ntree,
       parameters = parameters, 
       tune.parameters = tune.parameters,
       save.file.path = save.file.path, 
@@ -511,6 +511,40 @@ rf_cv <- function(
       })
     }
 
+
+# repeated cv/resampling
+rf_rcv <- function(
+  data, 
+  features,
+  y,
+  method = "cv",
+  p = ifelse(method == "resample", 0.8, NULL),
+  k = 10,
+  ntree = 500,
+  null_test = FALSE,
+  n_perm = if (null_test) 500 else NULL,
+  regression = TRUE,
+  probability = ifelse(regression, FALSE, TRUE),
+  repeated = 10) {
+    
+    all_model_and_data <- map(c(1:repeated), function(rep) {
+      model_and_data <- rf_cv(
+        data, 
+        features,
+        y,
+        method = method,
+        p = p,
+        k = k,
+        ntree = ntree,
+        null_test = null_test,
+        n_perm = n_perm,
+        regression = regression,
+        probability = probability
+      )
+    })
+    flatten(all_model_and_data)
+  }
+
 rf_model_fit <- function(
   models_and_data, 
   y, 
@@ -618,36 +652,7 @@ rf_summary <- function(
     }
   }
 
-rf_rcv <- function(
-  data, 
-  features,
-  y,
-  method = "cv",
-  p = ifelse(method == "resample", 0.8, NULL),
-  k = 10,
-  ntree = 500,
-  null_test = FALSE,
-  n_perm = if (null_test) 500 else NULL,
-  regression = TRUE,
-  probability = ifelse(regression, FALSE, TRUE),
-  repeated = 10) {
-    all_model_and_data <- map(c(1:repeated), function(reo) {
-      model_and_data <- rf_cv(
-        data, 
-        features,
-        y,
-        method = method,
-        p = p,
-        k = k,
-        ntree = ntree,
-        null_test = null_test,
-        n_perm = n_perm,
-        regression = regression,
-        probability = probability
-      )
-    })
-    flatten(all_model_and_data)
-  }
+
 
 
 get_oob <- function(model_and_data, summarise = TRUE) {
@@ -700,6 +705,54 @@ get_auc <- function(model_and_data, y, summarise = TRUE) {
   metric
 }
 
+get_pearson <- function(model_and_data, y, summarise = TRUE) {
+  metric <- map_dfr(model_and_data, function(md) {
+    fit <- md[[1]]
+    test <- md[[2]]
+    y_pred <- predict(fit, data = test)$predictions
+    y_true <- test[[y]]
+    p <- cor.test(y_true, y_pred)
+    list(pearson = round(p[4]$estimate, 3))
+  }) %>% pivot_longer(everything(), names_to = "fold", values_to = "pearson")
+    
+  if (summarise) {
+    metric <- metric %>%
+      summarise(
+        median = median(pearson),
+        mean = mean(pearson),
+        sd = sd(pearson),
+        lower = ifelse(berryFunctions::is.error(quantile(pearson, 0.025)), NA, quantile(pearson, 0.025)),
+        upper = ifelse(berryFunctions::is.error(quantile(pearson, 0.975)), NA, quantile(pearson, 0.975)),
+      )
+    }
+  metric
+}
+
+
+get_rsq <- function(model_and_data, y, summarise = TRUE) {
+  metric <- map_dfr(model_and_data, function(md) {
+    fit <- md[[1]]
+    list(rsq = fit$r.squared)
+  }) %>% pivot_longer(everything(), names_to = "fold", values_to = "rsq")
+    
+  if (summarise) {
+    metric <- metric %>%
+      summarise(
+        median = median(rsq),
+        mean = mean(rsq),
+        sd = sd(rsq),
+        lower = quantile(rsq, 0.025),
+        upper = quantile(rsq, 0.975)
+      )
+    }
+  metric
+}
+
+
+
+get_null <- function(
+  
+)
 
 
 
