@@ -140,116 +140,116 @@ rf_null <- function(
 }
 
 
-# returns a list of lists where each list has a fitted model and the
-# corresponding testdata as items 
-fit_cv <- function(
-  data, 
-  features,
-  y,
-  method = "cv",
-  p = ifelse(method == "resample", 0.8, NULL),
-  k = 10,
-  model_type = "ranger",
-  null_test = FALSE,
-  n_perm = if (null_test) 500 else NULL,
-  ...
-  ) {
-    
-    dots <- list(...)
-    
-    # cv/resample 
-    if (method == "cv") {
-      train_indeces <- caret::createFolds(
-        data[[y]], 
-        k = k,
-        returnTrain = TRUE)
-      
-    } else if (method == "resample") {
-      train_indeces <- caret::createDataPartition(
-        data[[y]], 
-        p = p, 
-        times = k)
-    }
-
-    
-    # this will return a list of lists that each contain a fitted model and 
-    # the corresponding test dataset 
-    models_and_testdata <- map(train_indeces, function(ind) {
-      train <- data[ind, ]
-      test <- data[-ind, ]
-      
-
-    
-      # fit randomForest 
-      if (model_type == "randomForest") {
-        model <- randomForest::randomForest(
-          y = train[[y]],
-          x = select(train, all_of(features)),
-          ntree = dots$ntree,
-          importance = "permutation"
-        )
-      } else if (model_type == "ranger") {
-        model <- ranger::ranger(
-          y = train[[y]],
-          x = select(train, all_of(features)),
-          ntree = dots$ntree,
-          importance = "permutation",
-          probability = probability
-        )
-      } else if (model_type == "XGBoost") {
-        # prepare xgb data matrix object
-        labels_train <- train[[y]] %>% as.numeric() -1 # one-hot-coding
-        labels_test <- test[[y]] %>% as.numeric() -1
-        train_xgb <- select(train, all_of(features)) %>% as.matrix()
-        test_xgb <- select(test, all_of(features)) %>% as.matrix()
-        train_xgb <- xgb.DMatrix(data = train_xgb, label = labels_train)
-        test_xgb <- xgb.DMatrix(data = test_xgb, label = labels_test)
-    
-        # set model parameters (this should be put in ... at some point)
-        params <- list(
-          booster = "gbtree",
-          objective = "binary:logistic",
-          eta = 0.3,
-          gamma = 0,
-          max_depth = 6,
-          min_child_weight = 1,
-          subsample = 1,
-          colsample_bytree = 1
-        )
-    
-        # fit model 
-        model <- xgb.train(
-          params = params,
-          data = train_xgb, 
-          nrounds = 10,
-          watchlist = list(val = test_xgb, train = train_xgb),
-          print_every_n = 10, 
-          early_stop_round = 10,
-          maximize = FALSE,
-          eval_metric = "logloss",
-          verbose = 0
-        )
-      }
-      
-      if (null_test) {
-        null_dist <- rf_null(
-          y,
-          features,
-          train,
-          test,
-          ntree = dots$ntree,
-          n_perm = n_perm
-        )
-        
-        return(list(model, test, null_dist))
-      } else {
-        # return fitted model and corresponding test data set
-        list(model, test)
-      }
-
-    })
-    return(models_and_testdata)
-}
+# # returns a list of lists where each list has a fitted model and the
+# # corresponding testdata as items 
+# fit_cv <- function(
+#   data, 
+#   features,
+#   y,
+#   method = "cv",
+#   p = ifelse(method == "resample", 0.8, NULL),
+#   k = 10,
+#   model_type = "ranger",
+#   null_test = FALSE,
+#   n_perm = if (null_test) 500 else NULL,
+#   ...
+#   ) {
+# 
+#     dots <- list(...)
+# 
+#     # cv/resample 
+#     if (method == "cv") {
+#       train_indeces <- caret::createFolds(
+#         data[[y]], 
+#         k = k,
+#         returnTrain = TRUE)
+# 
+#     } else if (method == "resample") {
+#       train_indeces <- caret::createDataPartition(
+#         data[[y]], 
+#         p = p, 
+#         times = k)
+#     }
+# 
+# 
+#     # this will return a list of lists that each contain a fitted model and 
+#     # the corresponding test dataset 
+#     models_and_testdata <- map(train_indeces, function(ind) {
+#       train <- data[ind, ]
+#       test <- data[-ind, ]
+# 
+# 
+# 
+#       # fit randomForest 
+#       if (model_type == "randomForest") {
+#         model <- randomForest::randomForest(
+#           y = train[[y]],
+#           x = select(train, all_of(features)),
+#           ntree = dots$ntree,
+#           importance = "permutation"
+#         )
+#       } else if (model_type == "ranger") {
+#         model <- ranger::ranger(
+#           y = train[[y]],
+#           x = select(train, all_of(features)),
+#           ntree = dots$ntree,
+#           importance = "permutation",
+#           probability = probability
+#         )
+#       } else if (model_type == "XGBoost") {
+#         # prepare xgb data matrix object
+#         labels_train <- train[[y]] %>% as.numeric() -1 # one-hot-coding
+#         labels_test <- test[[y]] %>% as.numeric() -1
+#         train_xgb <- select(train, all_of(features)) %>% as.matrix()
+#         test_xgb <- select(test, all_of(features)) %>% as.matrix()
+#         train_xgb <- xgb.DMatrix(data = train_xgb, label = labels_train)
+#         test_xgb <- xgb.DMatrix(data = test_xgb, label = labels_test)
+# 
+#         # set model parameters (this should be put in ... at some point)
+#         params <- list(
+#           booster = "gbtree",
+#           objective = "binary:logistic",
+#           eta = 0.3,
+#           gamma = 0,
+#           max_depth = 6,
+#           min_child_weight = 1,
+#           subsample = 1,
+#           colsample_bytree = 1
+#         )
+# 
+#         # fit model 
+#         model <- xgb.train(
+#           params = params,
+#           data = train_xgb, 
+#           nrounds = 10,
+#           watchlist = list(val = test_xgb, train = train_xgb),
+#           print_every_n = 10, 
+#           early_stop_round = 10,
+#           maximize = FALSE,
+#           eval_metric = "logloss",
+#           verbose = 0
+#         )
+#       }
+# 
+#       if (null_test) {
+#         null_dist <- rf_null(
+#           y,
+#           features,
+#           train,
+#           test,
+#           ntree = dots$ntree,
+#           n_perm = n_perm
+#         )
+# 
+#         return(list(model, test, null_dist))
+#       } else {
+#         # return fitted model and corresponding test data set
+#         list(model, test)
+#       }
+# 
+#     })
+#     return(models_and_testdata)
+# }
 
 
 
@@ -698,8 +698,8 @@ get_auc <- function(model_and_data, y, summarise = TRUE) {
         median = median(auc),
         mean = mean(auc),
         sd = sd(auc),
-        lower = quantile(auc, 0.025),
-        upper = quantile(auc, 0.975)
+        lower = ifelse(berryFunctions::is.error(quantile(auc, 0.025)), NA, quantile(auc, 0.025)),
+        upper = ifelse(berryFunctions::is.error(quantile(auc, 0.975)), NA, quantile(auc, 0.975))
       )
     }
   metric
@@ -722,7 +722,7 @@ get_pearson <- function(model_and_data, y, summarise = TRUE) {
         mean = mean(pearson),
         sd = sd(pearson),
         lower = ifelse(berryFunctions::is.error(quantile(pearson, 0.025)), NA, quantile(pearson, 0.025)),
-        upper = ifelse(berryFunctions::is.error(quantile(pearson, 0.975)), NA, quantile(pearson, 0.975)),
+        upper = ifelse(berryFunctions::is.error(quantile(pearson, 0.975)), NA, quantile(pearson, 0.975))
       )
     }
   metric
