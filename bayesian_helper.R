@@ -277,5 +277,5 @@ summarise_post <- function(
       confident = ifelse(
         (lower < 0 & upper < 0) | (lower > 0 & upper > 0), TRUE, FALSE)
     ) %>%
-    mutate(across(where(is.numeric), function(x), format(round(x, n_dec), nsmall = n_dec)))
+    mutate(across(where(is.numeric), function(x) format(round(x, n_dec), nsmall = n_dec)))
 }
