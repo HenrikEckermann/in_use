@@ -247,3 +247,35 @@ return_diag <- function(fit, genus) {
     } 
     TRUE
 }
+
+
+
+
+
+
+
+
+#####################################################################
+##########               2021                              ##########
+#####################################################################
+
+
+summarise_post <- function(
+  post, 
+  parameters = colnames(post), 
+  point = median, 
+  intervals = c(0.025, 0.975),
+  n_dec = 3
+  ) {
+  post %>%
+    pivot_longer(all_of(parameters), names_to = "parameter") %>%
+    group_by(parameter) %>%
+    summarise(
+      estimate = point(value), 
+      lower = quantile(value, intervals[1]), 
+      upper = quantile(value, intervals[2]),
+      confident = ifelse(
+        (lower < 0 & upper < 0) | (lower > 0 & upper > 0), TRUE, FALSE)
+    ) %>%
+    mutate(across(where(is.numeric), function(x), format(round(x, n_dec), nsmall = n_dec)))
+}

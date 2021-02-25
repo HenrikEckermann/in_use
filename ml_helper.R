@@ -458,6 +458,12 @@ rf_cv <- function(
     }  else {
       ranger_params[["scale.permutation.importance"]] <- FALSE
     }
+    if ("importance" %in% names(dots)) {
+      ranger_params[["importance"]] <- dots[["importance"]]
+    }  else {
+      ranger_params[["importance"]] <- "permutation"
+    }
+    
     
 
     # cv/resample 
@@ -482,7 +488,7 @@ rf_cv <- function(
         y = train[[y]],
         x = select(train, all_of(features)),
         num.trees  = ntree,
-        importance = "permutation",
+        importance = ranger_params[["importance"]],
         probability = probability,
         mtry = ranger_params[["mtry"]],
         min.node.size = ranger_params[["min.node.size"]],
