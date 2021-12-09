@@ -757,10 +757,6 @@ get_rsq <- function(model_and_data, y, summarise = TRUE) {
 
 
 
-get_null <- function(
-  
-)
-
 
 
 #########################
