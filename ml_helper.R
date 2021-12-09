@@ -333,7 +333,7 @@ select_features <- function(
     #imp_name <- colnames(top_predictors)[1]
     top_predictors <- top_predictors %>%
       rownames_to_column(id_name) %>%
-      arrange(desc(all_of("importance"))) %>%
+      arrange(desc(importance)) %>%
       select(all_of(id_name)) %>%
       head(n_features)
     }
