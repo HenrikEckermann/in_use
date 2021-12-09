@@ -329,10 +329,11 @@ select_features <- function(
   
     top_predictors <- importance(model, type = 1) %>%
       as.data.frame()
-    imp_name <- colnames(top_predictors)[1]
+    colnames(top_predictors) <- "importance"
+    #imp_name <- colnames(top_predictors)[1]
     top_predictors <- top_predictors %>%
       rownames_to_column(id_name) %>%
-      arrange(desc(all_of(imp_name))) %>%
+      arrange(desc(all_of("importance"))) %>%
       select(all_of(id_name)) %>%
       head(n_features)
     }
