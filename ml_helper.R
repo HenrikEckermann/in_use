@@ -385,7 +385,7 @@ tune_rf <- function(
       )
     }
 
-    estimateTimeTuneRanger(tune_task)
+    #estimateTimeTuneRanger(tune_task)
     res <- tuneRanger(
       tune_task, 
       measure = measure, 
