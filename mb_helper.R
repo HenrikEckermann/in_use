@@ -155,7 +155,7 @@ biplot <- function(
                 left_join(princomps, by = "sample_id")
     
     # apply filtering
-    if (filter_samples != FALSE) data <- data %>% filter(sample_id %in% filter_samples)
+    if (length(filter_samples) > 1) data <- data %>% filter(sample_id %in% filter_samples)
                        
     # avoid errors due to wrong class
     if (length(color) > 0 & !gradient) {
